@@ -12,15 +12,15 @@
   <style>
     body {
       font-family: 'Itim', cursive, sans-serif;
-      /* เรียกใช้รูปภาพแมวโดยตรงจาก GitHub ของคุณเชน */
-      background-image: url('https://raw.githubusercontent.com/AKRA-WEB/PPIN/main/cat-bg.png');
+      /* ใส่รูปพื้นหลังน้องแมวที่ส่งมา */
+      background-image: url('https://cdn.discordapp.com/attachments/1118181655077113948/1210884964640522250/image.png?ex=65ec398c&is=65d9c48c&hm=a1c18092a95781a74e5088f63567848f7289f6674c9354e3d36802e3b2c83307&'); /* หมายเหตุ: ลิงก์นี้ดึงจากรูปที่คุณส่งมา */
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
       -webkit-tap-highlight-color: transparent;
     }
     
-    /* กล่องข้อความแบบโปร่งแสงละมุนๆ สไตล์ Glassmorphism ให้เห็นพื้นหลังจางๆ */
+    /* ปรับให้ส่วนเนื้อหาแอปมีความโปร่งใสเล็กน้อยเพื่อให้เห็นพื้นหลังแมว */
     .glass-card {
       background-color: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(5px);
@@ -88,7 +88,7 @@
           </div>
           <div>
             <label class="text-sm font-semibold text-slate-500 block mb-1">หมวดหมู่</label>
-            <select id="exp-cat" class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600">
+            <select id="exp-cat" class="w-full px-4 py-3 bg-white/95 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600 relative z-10 cursor-pointer">
             </select>
           </div>
         </div>
@@ -197,6 +197,7 @@
   </div>
 
   <script>
+    // ดึงข้อมูลจาก Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbyL1tmys2fpD3H1uLAr-lceScZKOg_wZAFoiJ4tC3kR-srdDyP8mZxOKIRdkx2u3f37/exec";
 
     let globalData = { categories: [], expenses: [] };
@@ -346,7 +347,7 @@
                 <span class="text-xs text-slate-500">${e.date}</span>
               </div>
               <h4 class="font-bold text-slate-700">${e.desc}</h4>
-              <p class="text-xs text-slate-500"><span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span> | หมวด ${e.category}</p>
+              <p class="text-xs text-slate-500"><span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span></p>
             </div>
             <div class="text-right flex flex-col items-end gap-1">
               <span class="text-md font-bold text-slate-700">${e.amount.toFixed(2)} ฿</span>
