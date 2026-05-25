@@ -12,20 +12,16 @@
   <style>
     body {
       font-family: 'Itim', cursive, sans-serif;
-      /* ใส่รูปพื้นหลังน้องแมวที่ส่งมา */
-      background-image: url('https://cdn.discordapp.com/attachments/1118181655077113948/1210884964640522250/image.png?ex=65ec398c&is=65d9c48c&hm=a1c18092a95781a74e5088f63567848f7289f6674c9354e3d36802e3b2c83307&'); /* หมายเหตุ: ลิงก์นี้ดึงจากรูปที่คุณส่งมา */
+      background-image: url('https://cdn.discordapp.com/attachments/1118181655077113948/1210884964640522250/image.png?ex=65ec398c&is=65d9c48c&hm=a1c18092a95781a74e5088f63567848f7289f6674c9354e3d36802e3b2c83307&');
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
       -webkit-tap-highlight-color: transparent;
     }
-    
-    /* ปรับให้ส่วนเนื้อหาแอปมีความโปร่งใสเล็กน้อยเพื่อให้เห็นพื้นหลังแมว */
     .glass-card {
-      background-color: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(5px);
+      background-color: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(6px);
     }
-
     input[type=range] {
       -webkit-appearance: none;
       width: 100%;
@@ -62,7 +58,7 @@
       </div>
       <div>
         <h1 class="text-xl font-bold text-pink-500 tracking-wide">พี่ปิ่น & น้องนัด</h1>
-        <p class="text-xs text-slate-500">สมุดบันทึกหารค่าใช้จ่าย 🌸</p>
+        <p class="text-xs text-slate-500">สมุดบันทึกหารค่าใช้จ่ายรายเดือน 🌸</p>
       </div>
     </div>
     <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition relative z-30">
@@ -78,18 +74,38 @@
         
         <div>
           <label class="text-sm font-semibold text-slate-500 block mb-1">ชื่อรายการค่าใช้จ่าย</label>
-          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าน้ำไฟ..." class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700">
+          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700">
         </div>
 
         <div class="grid grid-cols-2 gap-3 relative z-20">
           <div>
-            <label class="text-sm font-semibold text-slate-500 block mb-1">จำนวนเงิน (บาท)</label>
+            <label class="text-sm font-semibold text-slate-500 block mb-1">จำนวนเงินรวม (บาท)</label>
             <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
           </div>
           <div class="relative z-30 pointer-events-auto">
             <label class="text-sm font-semibold text-slate-500 block mb-1">หมวดหมู่</label>
             <select id="exp-cat" class="w-full block px-4 py-3 bg-white rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600 relative z-50 cursor-pointer pointer-events-auto shadow-sm" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
             </select>
+          </div>
+        </div>
+
+        <div class="bg-rose-50/40 p-4 rounded-2xl border border-rose-100/60 space-y-3">
+          <div class="flex justify-between items-center">
+            <label class="text-sm font-bold text-slate-600 flex items-center gap-1.5">
+              <i class="fas fa-calendar-alt text-rose-400"></i> รายการนี้ผ่อนจ่ายรายเดือน
+            </label>
+            <input type="checkbox" id="is-installment" onchange="toggleInstallmentView()" class="w-4 h-4 accent-pink-500">
+          </div>
+          
+          <div id="installment-fields" class="grid grid-cols-2 gap-3 hidden">
+            <div>
+              <label class="text-xs font-bold text-slate-400 block mb-1">จำนวนเดือนที่ต้องการหาร</label>
+              <input type="number" id="installment-months" value="1" min="1" oninput="calculateSplit()" class="w-full px-3 py-2 bg-white rounded-xl border border-pink-100 text-center font-bold text-slate-700">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-400 block mb-1">เฉลี่ยตกเดือนละ (บาท)</label>
+              <div id="installment-per-month" class="w-full py-2 text-md font-black text-rose-500 text-center bg-white rounded-xl border border-dashed border-pink-200">0.00</div>
+            </div>
           </div>
         </div>
 
@@ -132,28 +148,35 @@
     </div>
 
     <div id="tab-dashboard" class="tab-content space-y-5 hidden">
+      
+      <div class="glass-card p-4 rounded-2xl border border-pink-100 flex items-center justify-between gap-3">
+        <label class="text-sm font-bold text-slate-600 whitespace-nowrap"><i class="fas fa-filter text-pink-400"></i> เลือกประจำเดือน:</label>
+        <select id="dash-month-filter" onchange="buildDashboard(); initOrUpdateChart();" class="px-4 py-2 bg-white rounded-xl border border-pink-200 text-slate-700 font-bold text-sm focus:outline-none">
+          </select>
+      </div>
+
       <div class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden backdrop-blur-sm">
         <div class="absolute -right-6 -bottom-6 text-white/10 text-9xl"><i class="fas fa-hand-holding-heart"></i></div>
-        <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดค้างจ่าย</h3>
+        <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดค้างจ่าย (เฉพาะเดือนที่เลือก)</h3>
         <div id="settle-summary" class="text-center py-3"></div>
         <button onclick="confirmSettle()" class="w-full py-2.5 bg-white text-pink-500 font-bold rounded-xl shadow-sm hover:bg-pink-50 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2">
-          <i class="fas fa-check-double"></i> กดยืนยันว่า "เคลียร์เงินกันแล้ว"
+          <i class="fas fa-check-double"></i> กดยืนยันว่า "เคลียร์เงินเดือนนี้แล้ว"
         </button>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50">
-          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-tie text-pink-400"></i> พี่ปิ่นต้องจ่าย</p>
+          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-tie text-pink-400"></i> พี่ปิ่นต้องจ่ายรวม</p>
           <p id="dash-pin-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
         </div>
         <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50">
-          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-astronaut text-pink-400"></i> น้องนัดต้องจ่าย</p>
+          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-astronaut text-pink-400"></i> น้องนัดต้องจ่ายรวม</p>
           <p id="dash-nat-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
         </div>
       </div>
 
       <div class="glass-card p-5 rounded-3xl shadow-sm border border-pink-50 space-y-3 text-center">
-        <h3 class="text-sm font-bold text-slate-500"><i class="fas fa-chart-pie text-pink-400"></i> สัดส่วนแยกตามหมวดหมู่</h3>
+        <h3 class="text-sm font-bold text-slate-500"><i class="fas fa-chart-pie text-pink-400"></i> สัดส่วนแยกตามหมวดหมู่ประจำเดือน</h3>
         <div class="w-full max-w-[240px] mx-auto">
           <canvas id="categoryChart"></canvas>
         </div>
@@ -162,7 +185,7 @@
 
     <div id="tab-history" class="tab-content space-y-3 hidden">
       <div class="flex justify-between items-center px-1">
-        <h3 class="font-bold text-slate-600"><i class="fas fa-history text-pink-400"></i> ประวัติบันทึก</h3>
+        <h3 class="font-bold text-slate-600"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
         <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">0 รายการ</span>
       </div>
       <div id="expense-list" class="space-y-3"></div>
@@ -197,7 +220,6 @@
   </div>
 
   <script>
-    // ดึงข้อมูลจาก Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbyL1tmys2fpD3H1uLAr-lceScZKOg_wZAFoiJ4tC3kR-srdDyP8mZxOKIRdkx2u3f37/exec";
 
     let globalData = { categories: [], expenses: [] };
@@ -205,8 +227,36 @@
     let myChart = null;
 
     document.addEventListener("DOMContentLoaded", function() {
+      initMonthFilter();
       callAPI("getInitialData", null, renderApp);
     });
+
+    function initMonthFilter() {
+      const select = document.getElementById('dash-month-filter');
+      const now = new Date();
+      let options = "";
+      // ย้อนหลัง 3 เดือน และล่วงหน้า 8 เดือน เพื่อรองรับการดูรอบบิลผ่อนจ่าย
+      for (let i = -3; i <= 8; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+        const selected = i === 0 ? "selected" : "";
+        options += `<option value="${val}" ${selected}>${label}</option>`;
+      }
+      select.innerHTML = options;
+    }
+
+    function toggleInstallmentView() {
+      const isChecked = document.getElementById('is-installment').checked;
+      const fields = document.getElementById('installment-fields');
+      if(isChecked) {
+        fields.classList.remove('hidden');
+      } else {
+        fields.classList.add('hidden');
+        document.getElementById('installment-months').value = 1;
+      }
+      calculateSplit();
+    }
 
     function callAPI(action, data, callback) {
       document.getElementById('loading').classList.remove('hidden');
@@ -218,11 +268,8 @@
       })
       .then(response => response.json())
       .then(res => {
-        if (res.status === "success") {
-          callback(res.data);
-        } else {
-          alert("เกิดข้อผิดพลาด: " + res.message);
-        }
+        if (res.status === "success") { callback(res.data); } 
+        else { alert("เกิดข้อผิดพลาด: " + res.message); }
         document.getElementById('loading').classList.add('hidden');
       })
       .catch(err => {
@@ -252,7 +299,7 @@
       el.classList.replace('text-slate-400', 'text-pink-500');
       el.querySelector('div').classList.replace('bg-transparent', 'bg-pink-100');
       el.querySelector('div').classList.replace('text-slate-400', 'text-pink-500');
-      if(tabId === 'dashboard') { setTimeout(initOrUpdateChart, 100); }
+      if(tabId === 'dashboard') { setTimeout(() => { buildDashboard(); initOrUpdateChart(); }, 100); }
     }
 
     function setPaidBy(person) {
@@ -273,8 +320,14 @@
 
     function calculateSplit() {
       const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
+      const months = parseInt(document.getElementById('installment-months').value) || 1;
+      
+      const perMonth = amount / months;
+      document.getElementById('installment-per-month').innerText = `${perMonth.toFixed(2)} ฿`;
+
       const pinPct = parseInt(document.getElementById('split-slider').value);
       const natPct = 100 - pinPct;
+      
       document.getElementById('label-pin-pct').innerText = `${pinPct}%`;
       document.getElementById('label-nat-pct').innerText = `${natPct}%`;
       document.getElementById('label-pin-share').innerText = `${((amount * pinPct) / 100).toFixed(2)} บาท`;
@@ -287,30 +340,60 @@
       const category = document.getElementById('exp-cat').value;
       const pinPct = parseInt(document.getElementById('split-slider').value);
       const natPct = 100 - pinPct;
+      const isInstallment = document.getElementById('is-installment').checked;
+      const months = isInstallment ? (parseInt(document.getElementById('installment-months').value) || 1) : 1;
       
       if(!desc || amount <= 0) { alert("กรอกข้อมูลให้ครบก่อนน้า 🥺"); return; }
       
+      const now = new Date();
+      const startMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
       callAPI("addExpense", {
         desc: desc, amount: amount, paidBy: currentPaidBy,
         pinPct: pinPct, natPct: natPct, pinShare: (amount * pinPct) / 100, natShare: (amount * natPct) / 100,
-        category: category
+        category: category, months: months, startMonth: startMonthStr
       }, (data) => {
         document.getElementById('exp-desc').value = "";
         document.getElementById('exp-amount').value = "";
+        document.getElementById('is-installment').checked = false;
+        document.getElementById('installment-fields').classList.add('hidden');
         resetSplit5050();
         renderApp(data);
-        alert("บันทึกเรียบร้อย! 🎉");
+        alert("บันทึกรายการเรียบร้อย! 🎉");
       });
     }
 
-    function buildDashboard() {
-      const unpaidExpenses = globalData.expenses.filter(e => e.status === 'Unpaid');
-      let pinTotalResp = 0, natTotalResp = 0, pinPaid = 0, natPaid = 0;
+    // ฟังก์ชันช่วยเช็กว่ารายการครอบคลุมในเดือนที่เลือกดูหรือไม่
+    function isItemInSelectedMonth(item, selectedMonthStr) {
+      if (!item.startMonth) return item.date.substring(0, 7) === selectedMonthStr;
       
-      unpaidExpenses.forEach(e => {
-        pinTotalResp += e.pinShare; natTotalResp += e.natShare;
-        if(e.paidBy === 'พี่ปิ่น') pinPaid += e.amount;
-        if(e.paidBy === 'น้องนัด') natPaid += e.amount;
+      const start = new Date(item.startMonth + "-01");
+      const target = new Date(selectedMonthStr + "-01");
+      const diffMonths = (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth());
+      
+      return diffMonths >= 0 && diffMonths < item.months;
+    }
+
+    function buildDashboard() {
+      const targetMonth = document.getElementById('dash-month-filter').value;
+      let pinTotalResp = 0, natTotalResp = 0, pinPaid = 0, natPaid = 0;
+      let hasUnpaid = false;
+
+      globalData.expenses.forEach(e => {
+        if (isItemInSelectedMonth(e, targetMonth)) {
+          // ยอดแชร์รายเดือน = ยอดทั้งหมดหารด้วยจำนวนเดือนที่ผ่อน
+          const itemMonthlyAmount = e.amount / e.months;
+          const itemPinShare = e.pinShare / e.months;
+          const itemNatShare = e.natShare / e.months;
+
+          if (e.status === 'Unpaid') {
+            hasUnpaid = true;
+            pinTotalResp += itemPinShare;
+            natTotalResp += itemNatShare;
+            if (e.paidBy === 'พี่ปิ่น') pinPaid += itemMonthlyAmount;
+            if (e.paidBy === 'น้องนัด') natPaid += itemMonthlyAmount;
+          }
+        }
       });
       
       document.getElementById('dash-pin-total').innerText = `${pinTotalResp.toFixed(2)} ฿`;
@@ -319,14 +402,14 @@
       const settleBox = document.getElementById('settle-summary');
       const pinNet = pinTotalResp - pinPaid;
       
-      if(unpaidExpenses.length === 0) {
-        settleBox.innerHTML = `<p class="text-2xl font-bold">🎉 เคลียร์หมดแล้วจ้า!</p>`;
+      if (!hasUnpaid) {
+        settleBox.innerHTML = `<p class="text-2xl font-bold">🎉 เดือนนี้เคลียร์หมดแล้วจ้า!</p>`;
       } else if (pinNet > 0) {
         settleBox.innerHTML = `<p class="text-xs opacity-80">พี่ปิ่นต้องโอนให้น้องนัด</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
       } else if (pinNet < 0) {
         settleBox.innerHTML = `<p class="text-xs opacity-80">น้องนัดต้องโอนให้พี่ปิ่น</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
       } else {
-        settleBox.innerHTML = `<p class="text-2xl font-bold">🤝 ยอดลงตัวพอดีเป๊ะ!</p>`;
+        settleBox.innerHTML = `<p class="text-2xl font-bold">🤝 ยอดเดือนนี้ลงตัวพอดีเป๊ะ!</p>`;
       }
     }
 
@@ -339,15 +422,20 @@
       }
       container.innerHTML = globalData.expenses.map(e => {
         const isPaid = e.status === 'Paid';
+        const isInstallment = e.months > 1;
         return `
           <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center">
             <div>
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">${isPaid ? 'เคลียร์แล้ว' : 'ค้างเคลียร์'}</span>
+                ${isInstallment ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-600"><i class="fas fa-clock"></i> ผ่อน ${e.months} เดือน</span>` : ''}
                 <span class="text-xs text-slate-500">${e.date}</span>
               </div>
               <h4 class="font-bold text-slate-700">${e.desc}</h4>
-              <p class="text-xs text-slate-500"><span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span></p>
+              <p class="text-xs text-slate-500">
+                <span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span>
+                ${isInstallment ? ` (ตกเดือนละ ${(e.amount/e.months).toFixed(2)} ฿)` : ''}
+              </p>
             </div>
             <div class="text-right flex flex-col items-end gap-1">
               <span class="text-md font-bold text-slate-700">${e.amount.toFixed(2)} ฿</span>
@@ -359,8 +447,16 @@
 
     function initOrUpdateChart() {
       const ctx = document.getElementById('categoryChart').getContext('2d');
+      const targetMonth = document.getElementById('dash-month-filter').value;
       const catTotals = {};
-      globalData.expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
+      
+      globalData.expenses.forEach(e => {
+        if (isItemInSelectedMonth(e, targetMonth)) {
+          const monthlyAmount = e.amount / e.months;
+          catTotals[e.category] = (catTotals[e.category] || 0) + monthlyAmount;
+        }
+      });
+
       const labels = Object.keys(catTotals);
       const dataValues = Object.values(catTotals);
       if (myChart) { myChart.destroy(); }
@@ -390,7 +486,11 @@
     }
 
     function confirmSettle() {
-      if(confirm("โอนเงินเคลียร์ยอดกันเสร็จแล้วนะ 💕")) { callAPI("settleExpenses", null, renderApp); }
+      const targetMonth = document.getElementById('dash-month-filter').value;
+      const monthLabel = document.getElementById('dash-month-filter').options[document.getElementById('dash-month-filter').selectedIndex].text;
+      if(confirm(`โอนเงินเคลียร์ยอดประจำรอบ "${monthLabel}" กันเสร็จแล้วนะ 💕`)) { 
+        callAPI("settleExpenses", targetMonth, renderApp); 
+      }
     }
   </script>
 </body>
