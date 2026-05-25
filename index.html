@@ -19,8 +19,9 @@
       -webkit-tap-highlight-color: transparent;
     }
     .glass-card {
-      background-color: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(6px);
+      background-color: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
     }
     input[type=range] {
       -webkit-appearance: none;
@@ -41,121 +42,128 @@
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .custom-shadow { box-shadow: 0 8px 20px rgba(255, 182, 193, 0.3); }
+    .custom-shadow { box-shadow: 0 8px 20px rgba(255, 182, 193, 0.2); }
   </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 relative">
+<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 px-4 relative">
 
   <div id="loading" class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center gap-3">
     <i class="fas fa-cookie-bite text-pink-400 text-5xl animate-bounce"></i>
     <p class="text-pink-500 font-bold text-lg">กำลังโหลดข้อมูล...</p>
   </div>
 
-  <div class="p-5 pt-6 glass-card rounded-b-[2rem] shadow-sm flex items-center justify-between">
+  <div class="p-5 pt-6 glass-card rounded-b-[2rem] shadow-sm flex items-center justify-between mx-1">
     <div class="flex items-center gap-3">
-      <div class="w-12 h-12 bg-pink-100 rounded-full flex justify-center items-center text-pink-500 text-2xl">
+      <div class="w-12 h-12 bg-pink-100/90 rounded-full flex justify-center items-center text-pink-500 text-2xl">
         <i class="fas fa-heart"></i>
       </div>
       <div>
         <h1 class="text-xl font-bold text-pink-500 tracking-wide">พี่ปิ่น & น้องนัด</h1>
-        <p class="text-xs text-slate-500">สมุดบันทึกหารค่าใช้จ่ายรายเดือน 🌸</p>
+        <p class="text-xs text-slate-600">สมุดบันทึกหารค่าใช้จ่ายรายเดือน 🌸</p>
       </div>
     </div>
-    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition relative z-30">
+    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50/90 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition relative z-30">
       <i class="fas fa-folder-plus"></i>
     </button>
   </div>
 
-  <div class="flex-1 p-4 overflow-y-auto no-scrollbar relative z-10">
+  <div class="flex-1 py-4 overflow-y-auto no-scrollbar relative z-10">
     
     <div id="tab-form" class="tab-content space-y-5">
       <div class="glass-card p-5 rounded-3xl custom-shadow space-y-4">
-        <h2 class="text-lg font-bold text-slate-600 flex items-center gap-2"><i class="fas fa-pen text-pink-400"></i> จดบันทึกรายการใหม่</h2>
+        <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-pen text-pink-400"></i> จดบันทึกรายการใหม่</h2>
         
         <div>
-          <label class="text-sm font-semibold text-slate-500 block mb-1">ชื่อรายการค่าใช้จ่าย</label>
-          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700">
+          <label class="text-sm font-semibold text-slate-600 block mb-1">ชื่อรายการค่าใช้จ่าย</label>
+          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-800 font-medium">
         </div>
 
         <div class="grid grid-cols-2 gap-3 relative z-20">
           <div>
-            <label class="text-sm font-semibold text-slate-500 block mb-1">จำนวนเงินรวม (บาท)</label>
-            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
+            <label class="text-sm font-semibold text-slate-600 block mb-1">จำนวนเงินรวม (บาท)</label>
+            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
           </div>
           <div class="relative z-30 pointer-events-auto">
-            <label class="text-sm font-semibold text-slate-500 block mb-1">หมวดหมู่</label>
-            <select id="exp-cat" class="w-full block px-4 py-3 bg-white rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600 relative z-50 cursor-pointer pointer-events-auto shadow-sm" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
+            <label class="text-sm font-semibold text-slate-600 block mb-1">หมวดหมู่</label>
+            <select id="exp-cat" class="w-full block px-4 py-3 bg-white rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700 font-medium relative z-50 cursor-pointer pointer-events-auto shadow-sm" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
             </select>
           </div>
         </div>
 
-        <div class="bg-rose-50/40 p-4 rounded-2xl border border-rose-100/60 space-y-3">
+        <div class="bg-rose-50/60 p-4 rounded-2xl border border-rose-100/60 space-y-4">
+          <div>
+            <label class="text-sm font-bold text-slate-700 block mb-1"><i class="fas fa-calendar-day text-rose-400"></i> เริ่มเรียกเก็บเงินที่เดือนไหน?</label>
+            <select id="exp-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
+            </select>
+          </div>
+
+          <hr class="border-rose-100">
+
           <div class="flex justify-between items-center">
-            <label class="text-sm font-bold text-slate-600 flex items-center gap-1.5">
-              <i class="fas fa-calendar-alt text-rose-400"></i> รายการนี้ผ่อนจ่ายรายเดือน
+            <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fas fa-calendar-alt text-rose-500"></i> รายการนี้ต้องการผ่อนจ่ายหลายเดือน
             </label>
             <input type="checkbox" id="is-installment" onchange="toggleInstallmentView()" class="w-4 h-4 accent-pink-500">
           </div>
           
           <div id="installment-fields" class="grid grid-cols-2 gap-3 hidden">
             <div>
-              <label class="text-xs font-bold text-slate-400 block mb-1">จำนวนเดือนที่ต้องการหาร</label>
-              <input type="number" id="installment-months" value="1" min="1" oninput="calculateSplit()" class="w-full px-3 py-2 bg-white rounded-xl border border-pink-100 text-center font-bold text-slate-700">
+              <label class="text-xs font-bold text-slate-500 block mb-1">จำนวนเดือนที่ต้องการหาร</label>
+              <input type="number" id="installment-months" value="1" min="1" oninput="calculateSplit()" class="w-full px-3 py-2 bg-white/80 rounded-xl border border-pink-100 text-center font-bold text-slate-700">
             </div>
             <div>
-              <label class="text-xs font-bold text-slate-400 block mb-1">เฉลี่ยตกเดือนละ (บาท)</label>
-              <div id="installment-per-month" class="w-full py-2 text-md font-black text-rose-500 text-center bg-white rounded-xl border border-dashed border-pink-200">0.00</div>
+              <label class="text-xs font-bold text-slate-500 block mb-1">เฉลี่ยตกเดือนละ (บาท)</label>
+              <div id="installment-per-month" class="w-full py-2 text-md font-black text-rose-500 text-center bg-white/80 rounded-xl border border-dashed border-pink-200">0.00</div>
             </div>
           </div>
         </div>
 
         <div>
-          <label class="text-sm font-semibold text-slate-500 block mb-2">ใครเป็นคนสำรองจ่ายก่อน?</label>
+          <label class="text-sm font-semibold text-slate-600 block mb-2">ใครเป็นคนสำรองจ่ายก่อน?</label>
           <div class="grid grid-cols-2 gap-3">
-            <button id="btn-paid-pin" onclick="setPaidBy('พี่ปิ่น')" class="py-3 rounded-2xl border-2 border-pink-300 bg-pink-100 text-pink-600 font-bold transition flex justify-center items-center gap-2">
+            <button id="btn-paid-pin" onclick="setPaidBy('พี่ปิ่น')" class="py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2">
               <i class="fas fa-user-tie"></i> พี่ปิ่นจ่าย
             </button>
-            <button id="btn-paid-nat" onclick="setPaidBy('น้องนัด')" class="py-3 rounded-2xl border-2 border-pink-100 bg-white text-slate-400 font-bold transition flex justify-center items-center gap-2">
+            <button id="btn-paid-nat" onclick="setPaidBy('น้องนัด')" class="py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2">
               <i class="fas fa-user-astronaut"></i> น้องนัดจ่าย
             </button>
           </div>
         </div>
 
-        <div class="bg-pink-50/60 p-4 rounded-2xl border border-pink-50 space-y-3">
-          <div class="flex justify-between items-center text-sm font-semibold text-slate-500">
+        <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-50 space-y-3">
+          <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
             <span>สัดส่วนการหารค่าใช้จ่าย</span>
             <button onclick="resetSplit5050()" class="text-xs text-pink-500 bg-white px-2 py-1 rounded-lg border border-pink-100 shadow-sm"><i class="fas fa-undo"></i> หารครึ่ง 50:50</button>
           </div>
           <input type="range" id="split-slider" min="0" max="100" value="50" oninput="onSliderChange()">
           <div class="grid grid-cols-2 gap-2 text-center pt-1">
-            <div class="bg-white p-2 rounded-xl border border-pink-100 shadow-sm">
-              <p class="text-xs text-slate-400 font-bold">พี่ปิ่นรับผิดชอบ</p>
+            <div class="bg-white/90 p-2 rounded-xl border border-pink-100 shadow-sm">
+              <p class="text-xs text-slate-500 font-bold">พี่ปิ่นรับผิดชอบ</p>
               <p id="label-pin-pct" class="text-lg font-bold text-pink-500">50%</p>
-              <p id="label-pin-share" class="text-xs font-bold text-slate-400">0.00 บาท</p>
+              <p id="label-pin-share" class="text-xs font-bold text-slate-500">0.00 บาท</p>
             </div>
-            <div class="bg-white p-2 rounded-xl border border-pink-100 shadow-sm">
-              <p class="text-xs text-slate-400 font-bold">น้องนัดรับผิดชอบ</p>
+            <div class="bg-white/90 p-2 rounded-xl border border-pink-100 shadow-sm">
+              <p class="text-xs text-slate-500 font-bold">น้องนัดรับผิดชอบ</p>
               <p id="label-nat-pct" class="text-lg font-bold text-pink-400">50%</p>
-              <p id="label-nat-share" class="text-xs font-bold text-slate-400">0.00 บาท</p>
+              <p id="label-nat-share" class="text-xs font-bold text-slate-500">0.00 บาท</p>
             </div>
           </div>
         </div>
 
-        <button onclick="submitExpense()" class="w-full py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-lg rounded-2xl custom-shadow active:scale-[0.98] transition flex justify-center items-center gap-2">
+        <button onclick="submitExpense()" class="w-full py-4 bg-gradient-to-r from-pink-400/95 to-rose-400/95 text-white font-bold text-lg rounded-2xl custom-shadow active:scale-[0.98] transition flex justify-center items-center gap-2">
           <i class="fas fa-cloud-upload-alt"></i> บันทึกรายการลงตาราง
         </button>
       </div>
     </div>
 
     <div id="tab-dashboard" class="tab-content space-y-5 hidden">
-      
       <div class="glass-card p-4 rounded-2xl border border-pink-100 flex items-center justify-between gap-3">
-        <label class="text-sm font-bold text-slate-600 whitespace-nowrap"><i class="fas fa-filter text-pink-400"></i> เลือกประจำเดือน:</label>
+        <label class="text-sm font-bold text-slate-700 whitespace-nowrap"><i class="fas fa-filter text-pink-400"></i> เลือกประจำเดือน:</label>
         <select id="dash-month-filter" onchange="buildDashboard(); initOrUpdateChart();" class="px-4 py-2 bg-white rounded-xl border border-pink-200 text-slate-700 font-bold text-sm focus:outline-none">
-          </select>
+        </select>
       </div>
 
-      <div class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden backdrop-blur-sm">
+      <div class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
         <div class="absolute -right-6 -bottom-6 text-white/10 text-9xl"><i class="fas fa-hand-holding-heart"></i></div>
         <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดค้างจ่าย (เฉพาะเดือนที่เลือก)</h3>
         <div id="settle-summary" class="text-center py-3"></div>
@@ -166,17 +174,17 @@
 
       <div class="grid grid-cols-2 gap-3">
         <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50">
-          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-tie text-pink-400"></i> พี่ปิ่นต้องจ่ายรวม</p>
+          <p class="text-xs font-bold text-slate-500"><i class="fas fa-user-tie text-pink-400"></i> พี่ปิ่นต้องจ่ายรวม</p>
           <p id="dash-pin-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
         </div>
         <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50">
-          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-astronaut text-pink-400"></i> น้องนัดต้องจ่ายรวม</p>
+          <p class="text-xs font-bold text-slate-500"><i class="fas fa-user-astronaut text-pink-400"></i> น้องนัดต้องจ่ายรวม</p>
           <p id="dash-nat-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
         </div>
       </div>
 
       <div class="glass-card p-5 rounded-3xl shadow-sm border border-pink-50 space-y-3 text-center">
-        <h3 class="text-sm font-bold text-slate-500"><i class="fas fa-chart-pie text-pink-400"></i> สัดส่วนแยกตามหมวดหมู่ประจำเดือน</h3>
+        <h3 class="text-sm font-bold text-slate-600"><i class="fas fa-chart-pie text-pink-400"></i> สัดส่วนแยกตามหมวดหมู่ประจำเดือน</h3>
         <div class="w-full max-w-[240px] mx-auto">
           <canvas id="categoryChart"></canvas>
         </div>
@@ -185,8 +193,8 @@
 
     <div id="tab-history" class="tab-content space-y-3 hidden">
       <div class="flex justify-between items-center px-1">
-        <h3 class="font-bold text-slate-600"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
-        <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">0 รายการ</span>
+        <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
+        <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
       </div>
       <div id="expense-list" class="space-y-3"></div>
     </div>
@@ -220,30 +228,40 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyL1tmys2fpD3H1uLAr-lceScZKOg_wZAFoiJ4tC3kR-srdDyP8mZxOKIRdkx2u3f37/exec";
+    // อัปเดตลิงก์ URL ตัวล่าสุดให้เรียบร้อยครับคุณ Chen
+    const API_URL = "https://script.google.com/macros/s/AKfycbwfUymozeDh9ftG09Ik9ZKR95mtiqMjXzJxKVQXoIXk7JGxlOdA-zYXz3Nocydu8yek/exec";
 
     let globalData = { categories: [], expenses: [] };
     let currentPaidBy = "พี่ปิ่น";
     let myChart = null;
 
     document.addEventListener("DOMContentLoaded", function() {
-      initMonthFilter();
+      initMonthFilters();
       callAPI("getInitialData", null, renderApp);
     });
 
-    function initMonthFilter() {
-      const select = document.getElementById('dash-month-filter');
+    function initMonthFilters() {
+      const dashSelect = document.getElementById('dash-month-filter');
+      const formSelect = document.getElementById('exp-start-month');
       const now = new Date();
-      let options = "";
-      // ย้อนหลัง 3 เดือน และล่วงหน้า 8 เดือน เพื่อรองรับการดูรอบบิลผ่อนจ่าย
-      for (let i = -3; i <= 8; i++) {
+      
+      let dashOptions = "";
+      let formOptions = "";
+      
+      for (let i = -3; i <= 12; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-        const selected = i === 0 ? "selected" : "";
-        options += `<option value="${val}" ${selected}>${label}</option>`;
+        
+        const selectedDash = i === 0 ? "selected" : "";
+        const selectedForm = i === 0 ? "selected" : "";
+        
+        dashOptions += `<option value="${val}" ${selectedDash}>${label}</option>`;
+        formOptions += `<option value="${val}" ${selectedForm}>${label}</option>`;
       }
-      select.innerHTML = options;
+      
+      dashSelect.innerHTML = dashOptions;
+      formSelect.innerHTML = formOptions;
     }
 
     function toggleInstallmentView() {
@@ -307,11 +325,11 @@
       const pinBtn = document.getElementById('btn-paid-pin');
       const natBtn = document.getElementById('btn-paid-nat');
       if(person === 'พี่ปิ่น') {
-        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100 text-pink-600 font-bold transition flex justify-center items-center gap-2";
-        natBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white text-slate-400 font-bold transition flex justify-center items-center gap-2";
+        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2";
+        natBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2";
       } else {
-        natBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100 text-pink-600 font-bold transition flex justify-center items-center gap-2";
-        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white text-slate-400 font-bold transition flex justify-center items-center gap-2";
+        natBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2";
+        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2";
       }
     }
 
@@ -343,10 +361,9 @@
       const isInstallment = document.getElementById('is-installment').checked;
       const months = isInstallment ? (parseInt(document.getElementById('installment-months').value) || 1) : 1;
       
-      if(!desc || amount <= 0) { alert("กรอกข้อมูลให้ครบก่อนน้า 🥺"); return; }
+      const startMonthStr = document.getElementById('exp-start-month').value;
       
-      const now = new Date();
-      const startMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      if(!desc || amount <= 0) { alert("กรอกข้อมูลให้ครบก่อนน้า 🥺"); return; }
 
       callAPI("addExpense", {
         desc: desc, amount: amount, paidBy: currentPaidBy,
@@ -357,13 +374,13 @@
         document.getElementById('exp-amount').value = "";
         document.getElementById('is-installment').checked = false;
         document.getElementById('installment-fields').classList.add('hidden');
+        document.getElementById('exp-start-month').selectedIndex = 3; 
         resetSplit5050();
         renderApp(data);
         alert("บันทึกรายการเรียบร้อย! 🎉");
       });
     }
 
-    // ฟังก์ชันช่วยเช็กว่ารายการครอบคลุมในเดือนที่เลือกดูหรือไม่
     function isItemInSelectedMonth(item, selectedMonthStr) {
       if (!item.startMonth) return item.date.substring(0, 7) === selectedMonthStr;
       
@@ -381,7 +398,6 @@
 
       globalData.expenses.forEach(e => {
         if (isItemInSelectedMonth(e, targetMonth)) {
-          // ยอดแชร์รายเดือน = ยอดทั้งหมดหารด้วยจำนวนเดือนที่ผ่อน
           const itemMonthlyAmount = e.amount / e.months;
           const itemPinShare = e.pinShare / e.months;
           const itemNatShare = e.natShare / e.months;
@@ -423,6 +439,15 @@
       container.innerHTML = globalData.expenses.map(e => {
         const isPaid = e.status === 'Paid';
         const isInstallment = e.months > 1;
+        
+        let monthNote = "";
+        if(e.startMonth) {
+          const startParts = e.startMonth.split('-');
+          const dObj = new Date(startParts[0], startParts[1] - 1, 1);
+          const monthLabel = dObj.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
+          monthNote = ` (เริ่มเก็บ: ${monthLabel})`;
+        }
+
         return `
           <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center">
             <div>
@@ -434,7 +459,8 @@
               <h4 class="font-bold text-slate-700">${e.desc}</h4>
               <p class="text-xs text-slate-500">
                 <span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span>
-                ${isInstallment ? ` (ตกเดือนละ ${(e.amount/e.months).toFixed(2)} ฿)` : ''}
+                <span class="text-slate-400 font-medium">${monthNote}</span>
+                ${isInstallment ? ` <br><span class="text-rose-400 font-semibold">(ตกเดือนละ ${(e.amount/e.months).toFixed(2)} ฿)</span>` : ''}
               </p>
             </div>
             <div class="text-right flex flex-col items-end gap-1">
