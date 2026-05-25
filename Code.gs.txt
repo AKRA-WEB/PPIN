@@ -1,0 +1,124 @@
+const SPREADSHEET_ID = "18lWpJ1PZrHOnOi-62mHFUXMPvCHklcZq9iKxnt0K9vg";
+
+function doPost(e) {
+  let postData;
+  try {
+    postData = JSON.parse(e.postData.contents);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Invalid JSON" }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const action = postData.action;
+  let resultData;
+  
+  if (action === "getInitialData") {
+    resultData = getInitialData();
+  } else if (action === "addExpense") {
+    resultData = addExpense(postData.data);
+  } else if (action === "addCategory") {
+    resultData = addCategory(postData.data);
+  } else if (action === "deleteExpense") {
+    resultData = deleteExpense(postData.data);
+  } else if (action === "settleExpenses") {
+    resultData = settleExpenses(postData.data);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ status: "success", data: resultData }))
+                       .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getInitialData() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  
+  const catSheet = ss.getSheetByName('Categories');
+  const catData = catSheet.getLastRow() > 0 ? catSheet.getRange(1, 1, catSheet.getLastRow(), 1).getValues().flat() : [];
+  
+  const expSheet = ss.getSheetByName('Expenses');
+  const expenses = [];
+  if (expSheet.getLastRow() > 1) {
+    const rows = expSheet.getRange(2, 1, expSheet.getLastRow() - 1, 13).getValues();
+    rows.forEach(r => {
+      expenses.push({
+        id: r[0],
+        date: Utilities.formatDate(new Date(r[1]), Session.getScriptTimeZone(), "yyyy-MM-dd"),
+        desc: r[2],
+        amount: Number(r[3]),
+        paidBy: r[4],
+        pinPct: Number(r[5]),
+        natPct: Number(r[6]),
+        pinShare: Number(r[7]),
+        natShare: Number(r[8]),
+        category: r[9],
+        status: r[10],
+        months: r[11] ? Number(r[11]) : 1,
+        startMonth: r[12] ? r[12] : ""
+      });
+    });
+  }
+  
+  return { categories: catData, expenses: expenses };
+}
+
+function addExpense(expenseData) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Expenses');
+  const id = "EXP" + new Date().getTime();
+  const date = new Date();
+  
+  // แก้ไขตรงนี้: ดึงค่า startMonth ที่เลือกมาจากหน้าแอปพลิเคชัน ถ้าไม่มีค่อย fallback เป็นเดือนปัจจุบัน
+  const startMonth = expenseData.startMonth || Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM");
+  const months = expenseData.months || 1;
+  
+  sheet.appendRow([
+    id, date, expenseData.desc, expenseData.amount, expenseData.paidBy,
+    expenseData.pinPct, expenseData.natPct, expenseData.pinShare, expenseData.natShare,
+    expenseData.category, "Unpaid", months, startMonth
+  ]);
+  return getInitialData();
+}
+
+function deleteExpense(id) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Expenses');
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues();
+  for (let i = 0; i < data.length; i++) {
+    if (data[i][0] === id) {
+      sheet.deleteRow(i + 2);
+      break;
+    }
+  }
+  return getInitialData();
+}
+
+function settleExpenses(targetMonth) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Expenses');
+  if (sheet.getLastRow() <= 1) return getInitialData();
+  
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 13).getValues();
+  
+  for (let i = 0; i < rows.length; i++) {
+    const months = rows[i][11] ? Number(rows[i][11]) : 1;
+    const startMonthStr = rows[i][12];
+    const currentStatus = rows[i][10];
+    
+    if (currentStatus === "Unpaid") {
+      if (isMonthInInstallment(startMonthStr, months, targetMonth)) {
+        sheet.getRange(i + 2, 11).setValue("Paid");
+      }
+    }
+  }
+  return getInitialData();
+}
+
+function isMonthInInstallment(startMonthStr, totalMonths, targetMonthStr) {
+  if (!startMonthStr || !targetMonthStr) return false;
+  if (startMonthStr === targetMonthStr) return true;
+  
+  const start = new Date(startMonthStr + "-01");
+  const target = new Date(targetMonthStr + "-01");
+  
+  const diffMonths = (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth());
+  return diffMonths >= 0 && diffMonths < totalMonths;
+}
