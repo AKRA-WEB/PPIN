@@ -9,9 +9,9 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "./cat-bg.png",
+      "src": "./cat-bg.jpg",
       "sizes": "any",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }
