@@ -65,12 +65,12 @@
         <p class="text-xs text-slate-500">สมุดบันทึกหารค่าใช้จ่าย 🌸</p>
       </div>
     </div>
-    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition">
+    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition relative z-30">
       <i class="fas fa-folder-plus"></i>
     </button>
   </div>
 
-  <div class="flex-1 p-4 overflow-y-auto no-scrollbar">
+  <div class="flex-1 p-4 overflow-y-auto no-scrollbar relative z-10">
     
     <div id="tab-form" class="tab-content space-y-5">
       <div class="glass-card p-5 rounded-3xl custom-shadow space-y-4">
@@ -81,14 +81,14 @@
           <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าน้ำไฟ..." class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3 relative z-20">
           <div>
             <label class="text-sm font-semibold text-slate-500 block mb-1">จำนวนเงิน (บาท)</label>
             <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
           </div>
-          <div>
+          <div class="relative z-30 pointer-events-auto">
             <label class="text-sm font-semibold text-slate-500 block mb-1">หมวดหมู่</label>
-            <select id="exp-cat" class="w-full px-4 py-3 bg-white/95 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600 relative z-10 cursor-pointer">
+            <select id="exp-cat" class="w-full block px-4 py-3 bg-white rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600 relative z-50 cursor-pointer pointer-events-auto shadow-sm" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
             </select>
           </div>
         </div>
