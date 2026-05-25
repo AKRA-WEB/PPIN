@@ -8,14 +8,16 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Invalid JSON" }))
                          .setMimeType(ContentService.MimeType.JSON);
   }
-  
+
   const action = postData.action;
   let resultData;
-  
+
   if (action === "getInitialData") {
     resultData = getInitialData();
   } else if (action === "addExpense") {
     resultData = addExpense(postData.data);
+  } else if (action === "editExpense") {
+    resultData = editExpense(postData.data);
   } else if (action === "addCategory") {
     resultData = addCategory(postData.data);
   } else if (action === "deleteExpense") {
@@ -23,22 +25,31 @@ function doPost(e) {
   } else if (action === "settleExpenses") {
     resultData = settleExpenses(postData.data);
   }
-  
+
   return ContentService.createTextOutput(JSON.stringify({ status: "success", data: resultData }))
                        .setMimeType(ContentService.MimeType.JSON);
 }
 
 function getInitialData() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  
+
   const catSheet = ss.getSheetByName('Categories');
-  const catData = catSheet.getLastRow() > 0 ? catSheet.getRange(1, 1, catSheet.getLastRow(), 1).getValues().flat() : [];
-  
+  const catData = catSheet.getLastRow() > 0
+    ? catSheet.getRange(1, 1, catSheet.getLastRow(), 1).getValues().flat().filter(s => s !== '')
+    : [];
+
   const expSheet = ss.getSheetByName('Expenses');
   const expenses = [];
   if (expSheet.getLastRow() > 1) {
-    const rows = expSheet.getRange(2, 1, expSheet.getLastRow() - 1, 13).getValues();
+    // Col: 1=id 2=date 3=desc 4=amount 5=paidBy 6=pinPct 7=natPct 8=pinShare 9=natShare
+    //      10=category 11=status 12=months 13=startMonth 14=settledMonths 15=isRecurring
+    const rows = expSheet.getRange(2, 1, expSheet.getLastRow() - 1, 15).getValues();
     rows.forEach(r => {
+      const startMonthRaw = r[12];
+      const startMonth = startMonthRaw instanceof Date
+        ? Utilities.formatDate(startMonthRaw, Session.getScriptTimeZone(), "yyyy-MM")
+        : (startMonthRaw ? String(startMonthRaw) : "");
+
       expenses.push({
         id: r[0],
         date: Utilities.formatDate(new Date(r[1]), Session.getScriptTimeZone(), "yyyy-MM-dd"),
@@ -52,12 +63,21 @@ function getInitialData() {
         category: r[9],
         status: r[10],
         months: r[11] ? Number(r[11]) : 1,
-        startMonth: r[12] ? r[12] : ""
+        startMonth: startMonth,
+        settledMonths: r[13] ? String(r[13]).split(',').filter(Boolean) : [],
+        isRecurring: r[14] === true || r[14] === "TRUE" || r[14] === "true"
       });
     });
   }
-  
+
   return { categories: catData, expenses: expenses };
+}
+
+function addCategory(categoryName) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const catSheet = ss.getSheetByName('Categories');
+  catSheet.appendRow([categoryName]);
+  return getInitialData();
 }
 
 function addExpense(expenseData) {
@@ -65,16 +85,50 @@ function addExpense(expenseData) {
   const sheet = ss.getSheetByName('Expenses');
   const id = "EXP" + new Date().getTime();
   const date = new Date();
-  
-  // แก้ไขตรงนี้: ดึงค่า startMonth ที่เลือกมาจากหน้าแอปพลิเคชัน ถ้าไม่มีค่อย fallback เป็นเดือนปัจจุบัน
+
   const startMonth = expenseData.startMonth || Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM");
   const months = expenseData.months || 1;
-  
+  const isRecurring = expenseData.isRecurring ? true : false;
+
   sheet.appendRow([
     id, date, expenseData.desc, expenseData.amount, expenseData.paidBy,
     expenseData.pinPct, expenseData.natPct, expenseData.pinShare, expenseData.natShare,
-    expenseData.category, "Unpaid", months, startMonth
+    expenseData.category, "Unpaid", months, startMonth, "", isRecurring
   ]);
+
+  // Force startMonth cell as plain text so Sheets won't auto-convert "YYYY-MM" to Date
+  const lastRow = sheet.getLastRow();
+  const monthCell = sheet.getRange(lastRow, 13);
+  monthCell.setNumberFormat('@STRING@');
+  monthCell.setValue(startMonth);
+
+  return getInitialData();
+}
+
+function editExpense(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Expenses');
+  if (sheet.getLastRow() <= 1) return getInitialData();
+
+  const idData = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues();
+  for (let i = 0; i < idData.length; i++) {
+    if (idData[i][0] === data.id) {
+      const row = i + 2;
+      sheet.getRange(row, 3).setValue(data.desc);
+      sheet.getRange(row, 4).setValue(data.amount);
+      sheet.getRange(row, 5).setValue(data.paidBy);
+      sheet.getRange(row, 6).setValue(data.pinPct);
+      sheet.getRange(row, 7).setValue(data.natPct);
+      sheet.getRange(row, 8).setValue(data.pinShare);
+      sheet.getRange(row, 9).setValue(data.natShare);
+      sheet.getRange(row, 10).setValue(data.category);
+      sheet.getRange(row, 12).setValue(data.months);
+      const monthCell = sheet.getRange(row, 13);
+      monthCell.setNumberFormat('@STRING@');
+      monthCell.setValue(data.startMonth);
+      break;
+    }
+  }
   return getInitialData();
 }
 
@@ -95,17 +149,34 @@ function settleExpenses(targetMonth) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('Expenses');
   if (sheet.getLastRow() <= 1) return getInitialData();
-  
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 13).getValues();
-  
+
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 14).getValues();
+
   for (let i = 0; i < rows.length; i++) {
     const months = rows[i][11] ? Number(rows[i][11]) : 1;
-    const startMonthStr = rows[i][12];
+    const startMonthRaw = rows[i][12];
+    const startMonthStr = startMonthRaw instanceof Date
+      ? Utilities.formatDate(startMonthRaw, Session.getScriptTimeZone(), "yyyy-MM")
+      : String(startMonthRaw || "");
     const currentStatus = rows[i][10];
-    
-    if (currentStatus === "Unpaid") {
-      if (isMonthInInstallment(startMonthStr, months, targetMonth)) {
+
+    if (currentStatus === "Unpaid" && isMonthInInstallment(startMonthStr, months, targetMonth)) {
+      if (months === 1) {
         sheet.getRange(i + 2, 11).setValue("Paid");
+      } else {
+        const existingSettled = rows[i][13] ? String(rows[i][13]) : "";
+        const settledArr = existingSettled ? existingSettled.split(',').filter(Boolean) : [];
+        if (!settledArr.includes(targetMonth)) settledArr.push(targetMonth);
+        sheet.getRange(i + 2, 14).setValue(settledArr.join(','));
+
+        const start = new Date(startMonthStr + "-01");
+        let allSettled = true;
+        for (let m = 0; m < months; m++) {
+          const d = new Date(start.getFullYear(), start.getMonth() + m, 1);
+          const mStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0');
+          if (!settledArr.includes(mStr)) { allSettled = false; break; }
+        }
+        if (allSettled) sheet.getRange(i + 2, 11).setValue("Paid");
       }
     }
   }
@@ -115,10 +186,8 @@ function settleExpenses(targetMonth) {
 function isMonthInInstallment(startMonthStr, totalMonths, targetMonthStr) {
   if (!startMonthStr || !targetMonthStr) return false;
   if (startMonthStr === targetMonthStr) return true;
-  
   const start = new Date(startMonthStr + "-01");
   const target = new Date(targetMonthStr + "-01");
-  
   const diffMonths = (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth());
   return diffMonths >= 0 && diffMonths < totalMonths;
 }

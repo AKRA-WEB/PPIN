@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FF6B8B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PPIN">
+  <link rel="manifest" href="./manifest.json">
   <title>Pinky Expense Splitter 🌸</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,20 +17,16 @@
   <style>
     body {
       font-family: 'Itim', cursive, sans-serif;
-      background-color: #FFF5F6; 
+      background-image: url('./cat-bg.png');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
       -webkit-tap-highlight-color: transparent;
     }
-    /* ดึงรูปภาพพื้นหลังตรงจาก GitHub Repository AKRA-WEB/PPIN */
-    .content-bg-cat {
-      background-image: url('https://raw.githubusercontent.com/AKRA-WEB/PPIN/main/cat-bg.png');
-      background-size: cover;
-      background-attachment: scroll;
-      background-position: center;
-    }
     .glass-card {
-      background-color: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      background-color: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
     }
     input[type=range] {
       -webkit-appearance: none;
@@ -47,16 +48,22 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .custom-shadow { box-shadow: 0 8px 20px rgba(255, 182, 193, 0.2); }
+    #toast { transition: opacity 0.3s ease; }
   </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 px-4 relative bg-rose-50/30">
+<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 px-4 relative">
 
+  <!-- Loading -->
   <div id="loading" class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center gap-3">
     <i class="fas fa-cookie-bite text-pink-400 text-5xl animate-bounce"></i>
     <p class="text-pink-500 font-bold text-lg">กำลังโหลดข้อมูล...</p>
   </div>
 
-  <div class="p-5 pt-6 bg-white/90 rounded-b-[2rem] shadow-sm flex items-center justify-between mx-1 relative z-20">
+  <!-- Toast -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-2xl font-bold text-sm shadow-lg opacity-0 pointer-events-none bg-emerald-400 text-white whitespace-nowrap"></div>
+
+  <!-- Header -->
+  <div class="p-5 pt-6 glass-card rounded-b-[2rem] shadow-sm flex items-center justify-between mx-1 relative z-20">
     <div class="flex items-center gap-3">
       <div class="w-12 h-12 bg-pink-100/90 rounded-full flex justify-center items-center text-pink-500 text-2xl">
         <i class="fas fa-heart"></i>
@@ -66,50 +73,47 @@
         <p class="text-xs text-slate-600">สมุดบันทึกหารค่าใช้จ่ายรายเดือน 🌸</p>
       </div>
     </div>
-    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50/90 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition relative z-30">
+    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50/90 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition">
       <i class="fas fa-folder-plus"></i>
     </button>
   </div>
 
-  <div class="flex-1 py-4 px-2 my-2 overflow-y-auto no-scrollbar relative z-10 content-bg-cat rounded-3xl shadow-inner">
-    
+  <!-- Main Content -->
+  <div class="flex-1 py-4 overflow-y-auto no-scrollbar relative z-10">
+
+    <!-- Tab: บันทึก -->
     <div id="tab-form" class="tab-content space-y-5">
       <div class="glass-card p-5 rounded-3xl custom-shadow space-y-4">
         <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2"><i class="fas fa-pen text-pink-400"></i> จดบันทึกรายการใหม่</h2>
-        
+
         <div>
           <label class="text-sm font-semibold text-slate-600 block mb-1">ชื่อรายการค่าใช้จ่าย</label>
-          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/80 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-800 font-medium">
+          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-800 font-medium">
         </div>
 
         <div class="grid grid-cols-2 gap-3 relative z-20">
           <div>
             <label class="text-sm font-semibold text-slate-600 block mb-1">จำนวนเงินรวม (บาท)</label>
-            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/80 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
+            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
           </div>
           <div class="relative z-30 pointer-events-auto">
             <label class="text-sm font-semibold text-slate-600 block mb-1">หมวดหมู่</label>
-            <select id="exp-cat" class="w-full block px-4 py-3 bg-white rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700 font-medium relative z-50 cursor-pointer pointer-events-auto shadow-sm" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
-            </select>
+            <select id="exp-cat" class="w-full block px-4 py-3 bg-white rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700 font-medium relative z-50 cursor-pointer pointer-events-auto shadow-sm" style="-webkit-appearance: listbox !important; appearance: listbox !important;"></select>
           </div>
         </div>
 
-        <div class="bg-rose-50/90 p-4 rounded-2xl border border-rose-100/60 space-y-4">
+        <div class="bg-rose-50/60 p-4 rounded-2xl border border-rose-100/60 space-y-4">
           <div>
             <label class="text-sm font-bold text-slate-700 block mb-1"><i class="fas fa-calendar-day text-rose-400"></i> เริ่มเรียกเก็บเงินที่เดือนไหน?</label>
-            <select id="exp-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
-            </select>
+            <select id="exp-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="-webkit-appearance: listbox !important; appearance: listbox !important;"></select>
           </div>
-
           <hr class="border-rose-100">
-
           <div class="flex justify-between items-center">
             <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-              <i class="fas fa-calendar-alt text-rose-500"></i> รายการนี้ต้องการผ่อนจ่ายหลายเดือน
+              <i class="fas fa-calendar-alt text-rose-500"></i> ผ่อนจ่ายหลายเดือน
             </label>
             <input type="checkbox" id="is-installment" onchange="toggleInstallmentView()" class="w-4 h-4 accent-pink-500">
           </div>
-          
           <div id="installment-fields" class="grid grid-cols-2 gap-3 hidden">
             <div>
               <label class="text-xs font-bold text-slate-500 block mb-1">จำนวนเดือนที่ต้องการหาร</label>
@@ -119,6 +123,13 @@
               <label class="text-xs font-bold text-slate-500 block mb-1">เฉลี่ยตกเดือนละ (บาท)</label>
               <div id="installment-per-month" class="w-full py-2 text-md font-black text-rose-500 text-center bg-white/80 rounded-xl border border-dashed border-pink-200">0.00</div>
             </div>
+          </div>
+          <hr class="border-rose-100">
+          <div class="flex justify-between items-center">
+            <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fas fa-rotate text-rose-500"></i> รายการประจำ (เกิดซ้ำทุกเดือน)
+            </label>
+            <input type="checkbox" id="is-recurring" class="w-4 h-4 accent-pink-500">
           </div>
         </div>
 
@@ -134,7 +145,7 @@
           </div>
         </div>
 
-        <div class="bg-pink-50/80 p-4 rounded-2xl border border-pink-100 space-y-3">
+        <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-50 space-y-3">
           <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
             <span>สัดส่วนการหารค่าใช้จ่าย</span>
             <button onclick="resetSplit5050()" class="text-xs text-pink-500 bg-white px-2 py-1 rounded-lg border border-pink-100 shadow-sm"><i class="fas fa-undo"></i> หารครึ่ง 50:50</button>
@@ -160,11 +171,11 @@
       </div>
     </div>
 
+    <!-- Tab: แดชบอร์ด -->
     <div id="tab-dashboard" class="tab-content space-y-5 hidden">
       <div class="glass-card p-4 rounded-2xl border border-pink-100 flex items-center justify-between gap-3">
         <label class="text-sm font-bold text-slate-700 whitespace-nowrap"><i class="fas fa-filter text-pink-400"></i> เลือกประจำเดือน:</label>
-        <select id="dash-month-filter" onchange="buildDashboard(); initOrUpdateChart();" class="px-4 py-2 bg-white rounded-xl border border-pink-200 text-slate-700 font-bold text-sm focus:outline-none">
-        </select>
+        <select id="dash-month-filter" onchange="buildDashboard(); initOrUpdateChart();" class="px-4 py-2 bg-white rounded-xl border border-pink-200 text-slate-700 font-bold text-sm focus:outline-none"></select>
       </div>
 
       <div class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
@@ -195,18 +206,25 @@
       </div>
     </div>
 
+    <!-- Tab: ประวัติ -->
     <div id="tab-history" class="tab-content space-y-3 hidden">
-      <div class="flex justify-between items-center px-1 bg-white/60 p-2 rounded-xl backdrop-blur-sm">
+      <div class="flex justify-between items-center px-1">
         <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
         <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
+      </div>
+      <div class="glass-card rounded-2xl px-3 py-2 flex items-center gap-2 border border-pink-50">
+        <i class="fas fa-search text-pink-300 text-sm"></i>
+        <input type="text" id="history-search" oninput="filterHistory()" placeholder="ค้นหารายการ..." class="flex-1 bg-transparent text-sm text-slate-700 font-medium outline-none placeholder:text-slate-300">
+        <button onclick="document.getElementById('history-search').value=''; filterHistory()" class="text-slate-300 text-xs hover:text-pink-400 transition"><i class="fas fa-times"></i></button>
       </div>
       <div id="expense-list" class="space-y-3"></div>
     </div>
 
   </div>
 
+  <!-- Modal: เพิ่มหมวดหมู่ -->
   <div id="cat-modal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6 hidden">
-    <div class="bg-white w-full max-w-xs rounded-3xl p-5 space-y-4 shadow-xl transform scale-95 transition-all">
+    <div class="bg-white w-full max-w-xs rounded-3xl p-5 space-y-4 shadow-xl">
       <h3 class="font-bold text-lg text-slate-700 flex items-center gap-2"><i class="fas fa-plus-circle text-pink-400"></i> เพิ่มหมวดหมู่</h3>
       <input type="text" id="new-cat-input" placeholder="เช่น ค่าท่องเที่ยว" class="w-full px-4 py-3 bg-pink-50/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300">
       <div class="grid grid-cols-2 gap-3 pt-2">
@@ -216,7 +234,102 @@
     </div>
   </div>
 
-  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-lg rounded-t-[2.5rem] shadow-[0_-4px_20px_rgba(255,182,193,0.15)] flex justify-around items-center py-4 px-6 z-40">
+  <!-- Modal: Confirm -->
+  <div id="confirm-modal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6 hidden">
+    <div class="bg-white w-full max-w-xs rounded-3xl p-5 space-y-4 shadow-xl">
+      <div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center text-rose-500 text-xl mx-auto">
+        <i class="fas fa-question"></i>
+      </div>
+      <p id="confirm-msg" class="text-center font-bold text-slate-700 text-sm leading-relaxed"></p>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="closeConfirm()" class="py-2.5 bg-slate-100 text-slate-500 font-bold rounded-xl text-sm">ยกเลิก</button>
+        <button onclick="doConfirm()" class="py-2.5 bg-rose-400 text-white font-bold rounded-xl text-sm shadow-md">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: แก้ไขรายการ -->
+  <div id="edit-modal" class="fixed inset-0 bg-black/40 z-50 overflow-y-auto hidden">
+    <div class="min-h-screen flex items-start justify-center p-4 pt-6">
+      <div class="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-lg text-slate-700 flex items-center gap-2"><i class="fas fa-pen-to-square text-pink-400"></i> แก้ไขรายการ</h3>
+          <button onclick="closeEditModal()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-sm"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div>
+          <label class="text-sm font-semibold text-slate-600 block mb-1">ชื่อรายการ</label>
+          <input type="text" id="edit-desc" class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-800 font-medium">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm font-semibold text-slate-600 block mb-1">จำนวนเงิน (บาท)</label>
+            <input type="number" id="edit-amount" oninput="calculateEditSplit()" class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-slate-600 block mb-1">หมวดหมู่</label>
+            <select id="edit-cat" class="w-full block px-3 py-3 bg-white rounded-2xl border border-pink-100 text-slate-700 font-medium text-sm focus:outline-none" style="-webkit-appearance: listbox !important;"></select>
+          </div>
+        </div>
+
+        <div class="bg-rose-50/60 p-3 rounded-2xl border border-rose-100/60 space-y-3">
+          <div>
+            <label class="text-xs font-bold text-slate-600 block mb-1"><i class="fas fa-calendar-day text-rose-400"></i> เดือนเริ่มต้น</label>
+            <select id="edit-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none" style="-webkit-appearance: listbox !important;"></select>
+          </div>
+          <div class="flex justify-between items-center">
+            <label class="text-xs font-bold text-slate-700 flex items-center gap-1"><i class="fas fa-calendar-alt text-rose-500"></i> ผ่อนจ่าย</label>
+            <input type="checkbox" id="edit-is-installment" onchange="toggleEditInstallment()" class="w-4 h-4 accent-pink-500">
+          </div>
+          <div id="edit-installment-fields" class="hidden">
+            <label class="text-xs font-bold text-slate-500 block mb-1">จำนวนเดือน</label>
+            <input type="number" id="edit-installment-months" value="1" min="1" oninput="calculateEditSplit()" class="w-full px-3 py-2 bg-white/80 rounded-xl border border-pink-100 text-center font-bold text-slate-700">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-sm font-semibold text-slate-600 block mb-2">ใครสำรองจ่าย?</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="edit-btn-pin" onclick="setEditPaidBy('พี่ปิ่น')" class="py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1">
+              <i class="fas fa-user-tie"></i> พี่ปิ่น
+            </button>
+            <button id="edit-btn-nat" onclick="setEditPaidBy('น้องนัด')" class="py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1">
+              <i class="fas fa-user-astronaut"></i> น้องนัด
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-pink-50/50 p-3 rounded-2xl space-y-2">
+          <div class="flex justify-between text-xs font-semibold text-slate-600">
+            <span>สัดส่วน</span>
+            <button onclick="document.getElementById('edit-split-slider').value=50; calculateEditSplit()" class="text-pink-500 bg-white px-2 py-0.5 rounded-lg border border-pink-100 text-xs">50:50</button>
+          </div>
+          <input type="range" id="edit-split-slider" min="0" max="100" value="50" oninput="calculateEditSplit()">
+          <div class="grid grid-cols-2 gap-2 text-center">
+            <div class="bg-white/90 p-1.5 rounded-xl border border-pink-100">
+              <p class="text-xs text-slate-500">พี่ปิ่น</p>
+              <p id="edit-label-pin-pct" class="font-bold text-pink-500">50%</p>
+              <p id="edit-label-pin-share" class="text-xs text-slate-400">0.00 บาท</p>
+            </div>
+            <div class="bg-white/90 p-1.5 rounded-xl border border-pink-100">
+              <p class="text-xs text-slate-500">น้องนัด</p>
+              <p id="edit-label-nat-pct" class="font-bold text-pink-400">50%</p>
+              <p id="edit-label-nat-share" class="text-xs text-slate-400">0.00 บาท</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <button onclick="closeEditModal()" class="py-3 bg-slate-100 text-slate-500 font-bold rounded-2xl text-sm">ยกเลิก</button>
+          <button onclick="submitEditExpense()" class="py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold rounded-2xl text-sm shadow-md">บันทึกการแก้ไข</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-lg rounded-t-[2.5rem] shadow-[0_-4px_20px_rgba(255,182,193,0.15)] flex justify-around items-center py-4 px-6 z-40">
     <button onclick="switchTab('form', this)" class="nav-btn text-pink-500 flex flex-col items-center gap-1 group">
       <div class="w-12 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-heart-circle-plus"></i></div>
       <span class="text-xs font-bold">บันทึก</span>
@@ -232,85 +345,121 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwfUymozeDh9ftG09Ik9ZKR95mtiqMjXzJxKVQXoIXk7JGxlOdA-zYXz3Nocydu8yek/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyV33TC9oTp5MQiQ1-DynqSMfPhG93TCx1Qb2ey8Hkg4-qmD-38vewIq4QqRva6uBG7/exec";
 
     let globalData = { categories: [], expenses: [] };
     let currentPaidBy = "พี่ปิ่น";
+    let currentEditPaidBy = "พี่ปิ่น";
+    let currentEditId = null;
     let myChart = null;
+    let _confirmCallback = null;
 
+    // ─── Init ────────────────────────────────────────────────
     document.addEventListener("DOMContentLoaded", function() {
-      initMonthFilters();
+      initFormMonthFilter();
+      rebuildDashMonthFilter([]);
       callAPI("getInitialData", null, renderApp);
     });
 
-    function initMonthFilters() {
-      const dashSelect = document.getElementById('dash-month-filter');
+    function initFormMonthFilter() {
       const formSelect = document.getElementById('exp-start-month');
       const now = new Date();
-      
-      let dashOptions = "";
-      let formOptions = "";
-      
+      let opts = "";
       for (let i = -3; i <= 12; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-        
-        const selectedDash = i === 0 ? "selected" : "";
-        const selectedForm = i === 0 ? "selected" : "";
-        
-        dashOptions += `<option value="${val}" ${selectedDash}>${label}</option>`;
-        formOptions += `<option value="${val}" ${selectedForm}>${label}</option>`;
+        opts += `<option value="${val}" ${i === 0 ? 'selected' : ''}>${label}</option>`;
       }
-      
-      dashSelect.innerHTML = dashOptions;
-      formSelect.innerHTML = formOptions;
+      formSelect.innerHTML = opts;
     }
 
-    function toggleInstallmentView() {
-      const isChecked = document.getElementById('is-installment').checked;
-      const fields = document.getElementById('installment-fields');
-      if(isChecked) {
-        fields.classList.remove('hidden');
-      } else {
-        fields.classList.add('hidden');
-        document.getElementById('installment-months').value = 1;
+    function rebuildDashMonthFilter(expenses) {
+      const dashSelect = document.getElementById('dash-month-filter');
+      const prevVal = dashSelect.value;
+      const now = new Date();
+      const nowStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      const monthSet = new Set();
+      for (let i = -2; i <= 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
       }
-      calculateSplit();
+      expenses.forEach(e => {
+        const base = e.startMonth || (e.date ? e.date.substring(0, 7) : "");
+        if (!base) return;
+        const parts = base.split('-');
+        for (let m = 0; m < (e.months || 1); m++) {
+          const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1 + m, 1);
+          monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+        }
+      });
+
+      const sorted = Array.from(monthSet).sort();
+      const keepVal = (prevVal && sorted.includes(prevVal)) ? prevVal : nowStr;
+
+      dashSelect.innerHTML = sorted.map(val => {
+        const p = val.split('-');
+        const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, 1);
+        const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+        return `<option value="${val}" ${val === keepVal ? 'selected' : ''}>${label}</option>`;
+      }).join('');
     }
 
+    // ─── Toast ───────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-2xl font-bold text-sm shadow-lg whitespace-nowrap ${type === 'success' ? 'bg-emerald-400 text-white' : 'bg-rose-400 text-white'}`;
+      toast.style.opacity = '1';
+      toast.style.pointerEvents = 'none';
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    }
+
+    // ─── Confirm Modal ───────────────────────────────────────
+    function showConfirm(msg, onConfirm) {
+      document.getElementById('confirm-msg').innerText = msg;
+      document.getElementById('confirm-modal').classList.remove('hidden');
+      _confirmCallback = onConfirm;
+    }
+    function closeConfirm() { document.getElementById('confirm-modal').classList.add('hidden'); }
+    function doConfirm() { closeConfirm(); if (_confirmCallback) _confirmCallback(); }
+
+    // ─── API ─────────────────────────────────────────────────
     function callAPI(action, data, callback) {
       document.getElementById('loading').classList.remove('hidden');
       fetch(API_URL, {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: action, data: data })
+        body: JSON.stringify({ action, data })
       })
-      .then(response => response.json())
+      .then(r => r.json())
       .then(res => {
-        if (res.status === "success") { callback(res.data); } 
-        else { alert("เกิดข้อผิดพลาด: " + res.message); }
+        if (res.status === "success") { callback(res.data); }
+        else { showToast("เกิดข้อผิดพลาด: " + res.message, 'error'); }
         document.getElementById('loading').classList.add('hidden');
       })
       .catch(err => {
         console.error(err);
-        alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ 🥺");
+        showToast("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ 🥺", 'error');
         document.getElementById('loading').classList.add('hidden');
       });
     }
 
     function renderApp(data) {
       globalData = data;
-      const select = document.getElementById('exp-cat');
-      select.innerHTML = data.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      document.getElementById('exp-cat').innerHTML = data.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      rebuildDashMonthFilter(data.expenses);
       calculateSplit();
       buildDashboard();
       buildHistoryList();
     }
 
+    // ─── Tabs ────────────────────────────────────────────────
     function switchTab(tabId, el) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
       document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.replace('text-pink-500', 'text-slate-400');
@@ -320,14 +469,15 @@
       el.classList.replace('text-slate-400', 'text-pink-500');
       el.querySelector('div').classList.replace('bg-transparent', 'bg-pink-100');
       el.querySelector('div').classList.replace('text-slate-400', 'text-pink-500');
-      if(tabId === 'dashboard') { setTimeout(() => { buildDashboard(); initOrUpdateChart(); }, 100); }
+      if (tabId === 'dashboard') { setTimeout(() => { buildDashboard(); initOrUpdateChart(); }, 100); }
     }
 
+    // ─── Add Form ────────────────────────────────────────────
     function setPaidBy(person) {
       currentPaidBy = person;
       const pinBtn = document.getElementById('btn-paid-pin');
       const natBtn = document.getElementById('btn-paid-nat');
-      if(person === 'พี่ปิ่น') {
+      if (person === 'พี่ปิ่น') {
         pinBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2";
         natBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2";
       } else {
@@ -336,19 +486,23 @@
       }
     }
 
+    function toggleInstallmentView() {
+      const checked = document.getElementById('is-installment').checked;
+      const fields = document.getElementById('installment-fields');
+      if (checked) { fields.classList.remove('hidden'); }
+      else { fields.classList.add('hidden'); document.getElementById('installment-months').value = 1; }
+      calculateSplit();
+    }
+
     function onSliderChange() { calculateSplit(); }
     function resetSplit5050() { document.getElementById('split-slider').value = 50; calculateSplit(); }
 
     function calculateSplit() {
       const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
       const months = parseInt(document.getElementById('installment-months').value) || 1;
-      
-      const perMonth = amount / months;
-      document.getElementById('installment-per-month').innerText = `${perMonth.toFixed(2)} ฿`;
-
+      document.getElementById('installment-per-month').innerText = `${(amount / months).toFixed(2)} ฿`;
       const pinPct = parseInt(document.getElementById('split-slider').value);
       const natPct = 100 - pinPct;
-      
       document.getElementById('label-pin-pct').innerText = `${pinPct}%`;
       document.getElementById('label-nat-pct').innerText = `${natPct}%`;
       document.getElementById('label-pin-share').innerText = `${((amount * pinPct) / 100).toFixed(2)} บาท`;
@@ -363,35 +517,152 @@
       const natPct = 100 - pinPct;
       const isInstallment = document.getElementById('is-installment').checked;
       const months = isInstallment ? (parseInt(document.getElementById('installment-months').value) || 1) : 1;
-      
       const startMonthStr = document.getElementById('exp-start-month').value;
-      
-      if(!desc || amount <= 0) { alert("กรอกข้อมูลให้ครบก่อนน้า 🥺"); return; }
+      const isRecurring = document.getElementById('is-recurring').checked;
+
+      if (!desc || amount <= 0) { showToast("กรอกข้อมูลให้ครบก่อนน้า 🥺", 'error'); return; }
 
       callAPI("addExpense", {
-        desc: desc, amount: amount, paidBy: currentPaidBy,
-        pinPct: pinPct, natPct: natPct, pinShare: (amount * pinPct) / 100, natShare: (amount * natPct) / 100,
-        category: category, months: months, startMonth: startMonthStr
+        desc, amount, paidBy: currentPaidBy,
+        pinPct, natPct,
+        pinShare: (amount * pinPct) / 100,
+        natShare: (amount * natPct) / 100,
+        category, months, startMonth: startMonthStr, isRecurring
       }, (data) => {
         document.getElementById('exp-desc').value = "";
         document.getElementById('exp-amount').value = "";
         document.getElementById('is-installment').checked = false;
+        document.getElementById('is-recurring').checked = false;
         document.getElementById('installment-fields').classList.add('hidden');
-        document.getElementById('exp-start-month').selectedIndex = 3; 
+        document.getElementById('installment-months').value = 1;
         resetSplit5050();
         renderApp(data);
-        alert("บันทึกรายการเรียบร้อย! 🎉");
+        showToast("บันทึกรายการเรียบร้อย! 🎉");
       });
     }
 
+    // ─── Edit ────────────────────────────────────────────────
+    function setEditPaidBy(person) {
+      currentEditPaidBy = person;
+      const pinBtn = document.getElementById('edit-btn-pin');
+      const natBtn = document.getElementById('edit-btn-nat');
+      if (person === 'พี่ปิ่น') {
+        pinBtn.className = "py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1";
+        natBtn.className = "py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1";
+      } else {
+        natBtn.className = "py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1";
+        pinBtn.className = "py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1";
+      }
+    }
+
+    function toggleEditInstallment() {
+      const checked = document.getElementById('edit-is-installment').checked;
+      const fields = document.getElementById('edit-installment-fields');
+      if (checked) { fields.classList.remove('hidden'); }
+      else { fields.classList.add('hidden'); document.getElementById('edit-installment-months').value = 1; }
+      calculateEditSplit();
+    }
+
+    function calculateEditSplit() {
+      const amount = parseFloat(document.getElementById('edit-amount').value) || 0;
+      const pinPct = parseInt(document.getElementById('edit-split-slider').value);
+      const natPct = 100 - pinPct;
+      document.getElementById('edit-label-pin-pct').innerText = `${pinPct}%`;
+      document.getElementById('edit-label-nat-pct').innerText = `${natPct}%`;
+      document.getElementById('edit-label-pin-share').innerText = `${((amount * pinPct) / 100).toFixed(2)} บาท`;
+      document.getElementById('edit-label-nat-share').innerText = `${((amount * natPct) / 100).toFixed(2)} บาท`;
+    }
+
+    function openEditModal(id) {
+      const e = globalData.expenses.find(exp => exp.id === id);
+      if (!e) return;
+      currentEditId = id;
+
+      document.getElementById('edit-cat').innerHTML = globalData.categories.map(c =>
+        `<option value="${c}" ${c === e.category ? 'selected' : ''}>${c}</option>`
+      ).join('');
+
+      const now = new Date();
+      let opts = "";
+      for (let i = -24; i <= 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+        opts += `<option value="${val}" ${val === e.startMonth ? 'selected' : ''}>${label}</option>`;
+      }
+      document.getElementById('edit-start-month').innerHTML = opts;
+
+      document.getElementById('edit-desc').value = e.desc;
+      document.getElementById('edit-amount').value = e.amount;
+      document.getElementById('edit-split-slider').value = e.pinPct;
+
+      const isInstall = e.months > 1;
+      document.getElementById('edit-is-installment').checked = isInstall;
+      document.getElementById('edit-installment-months').value = e.months;
+      if (isInstall) { document.getElementById('edit-installment-fields').classList.remove('hidden'); }
+      else { document.getElementById('edit-installment-fields').classList.add('hidden'); }
+
+      setEditPaidBy(e.paidBy);
+      calculateEditSplit();
+      document.getElementById('edit-modal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.add('hidden');
+      currentEditId = null;
+    }
+
+    function submitEditExpense() {
+      if (!currentEditId) return;
+      const desc = document.getElementById('edit-desc').value.trim();
+      const amount = parseFloat(document.getElementById('edit-amount').value) || 0;
+      const category = document.getElementById('edit-cat').value;
+      const pinPct = parseInt(document.getElementById('edit-split-slider').value);
+      const natPct = 100 - pinPct;
+      const startMonth = document.getElementById('edit-start-month').value;
+      const isInstall = document.getElementById('edit-is-installment').checked;
+      const months = isInstall ? (parseInt(document.getElementById('edit-installment-months').value) || 1) : 1;
+
+      if (!desc || amount <= 0) { showToast("กรอกข้อมูลให้ครบ 🥺", 'error'); return; }
+
+      const id = currentEditId;
+      closeEditModal();
+      callAPI("editExpense", {
+        id, desc, amount, paidBy: currentEditPaidBy,
+        pinPct, natPct,
+        pinShare: (amount * pinPct) / 100,
+        natShare: (amount * natPct) / 100,
+        category, months, startMonth
+      }, (data) => { renderApp(data); showToast("แก้ไขเรียบร้อย! ✏️"); });
+    }
+
+    function quickAddRecurring(id) {
+      const e = globalData.expenses.find(exp => exp.id === id);
+      if (!e) return;
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      callAPI("addExpense", {
+        desc: e.desc, amount: e.amount, paidBy: e.paidBy,
+        pinPct: e.pinPct, natPct: e.natPct,
+        pinShare: e.pinShare, natShare: e.natShare,
+        category: e.category, months: 1,
+        startMonth: currentMonth, isRecurring: false
+      }, (data) => { renderApp(data); showToast("เพิ่มรายการประจำเดือนแล้ว! 🔄"); });
+    }
+
+    // ─── Dashboard ───────────────────────────────────────────
     function isItemInSelectedMonth(item, selectedMonthStr) {
       if (!item.startMonth) return item.date.substring(0, 7) === selectedMonthStr;
-      
       const start = new Date(item.startMonth + "-01");
       const target = new Date(selectedMonthStr + "-01");
       const diffMonths = (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth());
-      
       return diffMonths >= 0 && diffMonths < item.months;
+    }
+
+    function isMonthSettled(item, monthStr) {
+      if (item.months <= 1) return item.status === 'Paid';
+      if (item.settledMonths && item.settledMonths.length > 0) return item.settledMonths.includes(monthStr);
+      return item.status === 'Paid';
     }
 
     function buildDashboard() {
@@ -400,27 +671,24 @@
       let hasUnpaid = false;
 
       globalData.expenses.forEach(e => {
-        if (isItemInSelectedMonth(e, targetMonth)) {
+        if (isItemInSelectedMonth(e, targetMonth) && !isMonthSettled(e, targetMonth)) {
           const itemMonthlyAmount = e.amount / e.months;
           const itemPinShare = e.pinShare / e.months;
           const itemNatShare = e.natShare / e.months;
-
-          if (e.status === 'Unpaid') {
-            hasUnpaid = true;
-            pinTotalResp += itemPinShare;
-            natTotalResp += itemNatShare;
-            if (e.paidBy === 'พี่ปิ่น') pinPaid += itemMonthlyAmount;
-            if (e.paidBy === 'น้องนัด') natPaid += itemMonthlyAmount;
-          }
+          hasUnpaid = true;
+          pinTotalResp += itemPinShare;
+          natTotalResp += itemNatShare;
+          if (e.paidBy === 'พี่ปิ่น') pinPaid += itemMonthlyAmount;
+          if (e.paidBy === 'น้องนัด') natPaid += itemMonthlyAmount;
         }
       });
-      
+
       document.getElementById('dash-pin-total').innerText = `${pinTotalResp.toFixed(2)} ฿`;
       document.getElementById('dash-nat-total').innerText = `${natTotalResp.toFixed(2)} ฿`;
-      
+
       const settleBox = document.getElementById('settle-summary');
       const pinNet = pinTotalResp - pinPaid;
-      
+
       if (!hasUnpaid) {
         settleBox.innerHTML = `<p class="text-2xl font-bold">🎉 เดือนนี้เคลียร์หมดแล้วจ้า!</p>`;
       } else if (pinNet > 0) {
@@ -432,94 +700,135 @@
       }
     }
 
+    // ─── History ─────────────────────────────────────────────
+    function filterHistory() {
+      const query = document.getElementById('history-search').value.trim().toLowerCase();
+      document.querySelectorAll('#expense-list .history-item').forEach(item => {
+        const text = item.getAttribute('data-search') || '';
+        item.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
     function buildHistoryList() {
       const container = document.getElementById('expense-list');
       document.getElementById('history-count').innerText = `${globalData.expenses.length} รายการ`;
-      if(globalData.expenses.length === 0) {
+      if (globalData.expenses.length === 0) {
         container.innerHTML = `<div class="glass-card text-center p-8 text-slate-500 text-sm rounded-2xl">ยังไม่มีประวัติจ้า</div>`;
         return;
       }
       container.innerHTML = globalData.expenses.map(e => {
         const isPaid = e.status === 'Paid';
         const isInstallment = e.months > 1;
-        
+
         let monthNote = "";
-        if(e.startMonth) {
-          const startParts = e.startMonth.split('-');
-          const dObj = new Date(startParts[0], startParts[1] - 1, 1);
-          const monthLabel = dObj.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
-          monthNote = ` (เริ่มเก็บ: ${monthLabel})`;
+        if (e.startMonth) {
+          const parts = e.startMonth.split('-');
+          const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+          monthNote = ` (เริ่มเก็บ: ${dObj.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })})`;
         }
 
+        let statusBadge;
+        if (isInstallment) {
+          const settledCount = e.settledMonths ? e.settledMonths.length : (isPaid ? e.months : 0);
+          const allDone = settledCount >= e.months;
+          statusBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${allDone ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">เคลียร์ ${settledCount}/${e.months} เดือน</span>`;
+        } else {
+          statusBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">${isPaid ? 'เคลียร์แล้ว' : 'ค้างเคลียร์'}</span>`;
+        }
+
+        const recurringBadge = e.isRecurring
+          ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-500"><i class="fas fa-rotate"></i> ประจำ</span>`
+          : '';
+
+        const recurringBtn = e.isRecurring
+          ? `<button onclick="quickAddRecurring('${e.id}')" title="เพิ่มเดือนนี้" class="text-purple-400 w-6 h-6 bg-purple-50/80 rounded-full flex items-center justify-center text-xs"><i class="fas fa-plus"></i></button>`
+          : '';
+
+        const searchText = `${e.desc} ${e.category} ${e.paidBy}`.toLowerCase();
+
         return `
-          <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">${isPaid ? 'เคลียร์แล้ว' : 'ค้างเคลียร์'}</span>
+          <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center history-item" data-search="${searchText}">
+            <div class="flex-1 min-w-0 pr-2">
+              <div class="flex items-center gap-1.5 mb-1 flex-wrap">
+                ${statusBadge}
+                ${recurringBadge}
                 ${isInstallment ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-600"><i class="fas fa-clock"></i> ผ่อน ${e.months} เดือน</span>` : ''}
                 <span class="text-xs text-slate-500">${e.date}</span>
               </div>
-              <h4 class="font-bold text-slate-700">${e.desc}</h4>
+              <h4 class="font-bold text-slate-700 truncate">${e.desc}</h4>
               <p class="text-xs text-slate-500">
                 <span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span>
-                <span class="text-slate-400 font-medium">${monthNote}</span>
-                ${isInstallment ? ` <br><span class="text-rose-400 font-semibold">(ตกเดือนละ ${(e.amount/e.months).toFixed(2)} ฿)</span>` : ''}
+                <span class="text-slate-400">${monthNote}</span>
+                ${isInstallment ? `<br><span class="text-rose-400 font-semibold">(ตกเดือนละ ${(e.amount / e.months).toFixed(2)} ฿)</span>` : ''}
               </p>
             </div>
-            <div class="text-right flex flex-col items-end gap-1">
+            <div class="text-right flex flex-col items-end gap-1 shrink-0">
               <span class="text-md font-bold text-slate-700">${e.amount.toFixed(2)} ฿</span>
-              <button onclick="deleteItem('${e.id}')" class="text-rose-400 w-6 h-6 bg-rose-50/80 rounded-full flex items-center justify-center text-xs backdrop-blur-sm"><i class="fas fa-trash-alt"></i></button>
+              <div class="flex gap-1">
+                ${recurringBtn}
+                <button onclick="openEditModal('${e.id}')" class="text-blue-400 w-6 h-6 bg-blue-50/80 rounded-full flex items-center justify-center text-xs"><i class="fas fa-pen"></i></button>
+                <button onclick="deleteItem('${e.id}')" class="text-rose-400 w-6 h-6 bg-rose-50/80 rounded-full flex items-center justify-center text-xs"><i class="fas fa-trash-alt"></i></button>
+              </div>
             </div>
           </div>`;
       }).join('');
     }
 
+    // ─── Chart ───────────────────────────────────────────────
     function initOrUpdateChart() {
       const ctx = document.getElementById('categoryChart').getContext('2d');
       const targetMonth = document.getElementById('dash-month-filter').value;
       const catTotals = {};
-      
+
       globalData.expenses.forEach(e => {
-        if (isItemInSelectedMonth(e, targetMonth)) {
-          const monthlyAmount = e.amount / e.months;
-          catTotals[e.category] = (catTotals[e.category] || 0) + monthlyAmount;
+        if (isItemInSelectedMonth(e, targetMonth) && !isMonthSettled(e, targetMonth)) {
+          catTotals[e.category] = (catTotals[e.category] || 0) + (e.amount / e.months);
         }
       });
 
       const labels = Object.keys(catTotals);
       const dataValues = Object.values(catTotals);
       if (myChart) { myChart.destroy(); }
-      if(labels.length === 0) return;
+      if (labels.length === 0) return;
       myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: labels,
+          labels,
           datasets: [{ data: dataValues, backgroundColor: ['#FF6B8B', '#FF8EAA', '#FFAEC1', '#FFD1DC', '#E8A0BF'], borderWidth: 2, borderColor: '#ffffff' }]
         },
         options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Itim', size: 11 } } } } }
       });
     }
 
+    // ─── Category Modal ──────────────────────────────────────
     function openAddCategoryModal() { document.getElementById('cat-modal').classList.remove('hidden'); }
     function closeAddCategoryModal() { document.getElementById('cat-modal').classList.add('hidden'); }
-    
+
     function submitNewCategory() {
       const input = document.getElementById('new-cat-input');
-      if(!input.value.trim()) return;
+      if (!input.value.trim()) return;
       closeAddCategoryModal();
-      callAPI("addCategory", input.value.trim(), (data) => { input.value = ""; renderApp(data); });
+      callAPI("addCategory", input.value.trim(), (data) => {
+        input.value = "";
+        renderApp(data);
+        showToast("เพิ่มหมวดหมู่แล้ว! 📂");
+      });
     }
 
+    // ─── Actions ─────────────────────────────────────────────
     function deleteItem(id) {
-      if(confirm("ลบรายการนี้ใช่ไหมคุณปิ่น? 🥺")) { callAPI("deleteExpense", id, renderApp); }
+      showConfirm("ลบรายการนี้ใช่ไหม? 🥺", () => {
+        callAPI("deleteExpense", id, (data) => { renderApp(data); showToast("ลบรายการแล้ว 🗑️"); });
+      });
     }
 
     function confirmSettle() {
-      const targetMonth = document.getElementById('dash-month-filter').value;
-      const monthLabel = document.getElementById('dash-month-filter').options[document.getElementById('dash-month-filter').selectedIndex].text;
-      if(confirm(`โอนเงินเคลียร์ยอดประจำรอบ "${monthLabel}" กันเสร็จแล้วนะ 💕`)) { 
-        callAPI("settleExpenses", targetMonth, renderApp); 
-      }
+      const sel = document.getElementById('dash-month-filter');
+      const monthLabel = sel.options[sel.selectedIndex].text;
+      const targetMonth = sel.value;
+      showConfirm(`โอนเงินเคลียร์ยอดประจำรอบ "${monthLabel}" กันเสร็จแล้วนะ 💕`, () => {
+        callAPI("settleExpenses", targetMonth, (data) => { renderApp(data); showToast("เคลียร์เงินเรียบร้อย! 💸"); });
+      });
     }
   </script>
 </body>

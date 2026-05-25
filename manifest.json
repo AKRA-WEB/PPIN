@@ -1,0 +1,17 @@
+{
+  "name": "Pinky Expense Splitter",
+  "short_name": "PPIN",
+  "description": "สมุดบันทึกหารค่าใช้จ่าย พี่ปิ่น & น้องนัด",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fff0f3",
+  "theme_color": "#FF6B8B",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./cat-bg.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
