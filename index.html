@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pinky Expense Splitter 🌸</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Itim', cursive, sans-serif;
+      background-color: #FFF5F5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: #FFE4E6;
+      height: 12px;
+      border-radius: 10px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #FF6B8B;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .custom-shadow { box-shadow: 0 8px 20px rgba(255, 182, 193, 0.3); }
+  </style>
+</head>
+<body class="max-w-md mx-auto min-h-screen flex flex-col bg-[#FFF8FA] text-slate-700 pb-24 relative">
+
+  <div id="loading" class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center gap-3">
+    <i class="fas fa-cookie-bite text-pink-400 text-5xl animate-bounce"></i>
+    <p class="text-pink-500 font-bold text-lg">กำลังโหลดข้อมูล...</p>
+  </div>
+
+  <div class="p-5 pt-6 bg-white rounded-b-[2rem] shadow-sm flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 bg-pink-100 rounded-full flex justify-center items-center text-pink-500 text-2xl">
+        <i class="fas fa-heart"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-pink-500 tracking-wide">Pin & Nat</h1>
+        <p class="text-xs text-slate-400">สมุดบันทึกหารค่าใช้จ่าย 🌸</p>
+      </div>
+    </div>
+    <button onclick="openAddCategoryModal()" class="w-9 h-9 bg-pink-50 rounded-full text-pink-400 flex items-center justify-center hover:bg-pink-100 transition">
+      <i class="fas fa-folder-plus"></i>
+    </button>
+  </div>
+
+  <div class="flex-1 p-4 overflow-y-auto no-scrollbar">
+    
+    <div id="tab-form" class="tab-content space-y-5">
+      <div class="bg-white p-5 rounded-3xl custom-shadow space-y-4">
+        <h2 class="text-lg font-bold text-slate-600 flex items-center gap-2"><i class="fas fa-pen text-pink-400"></i> จดบันทึกรายการใหม่</h2>
+        
+        <div>
+          <label class="text-sm font-semibold text-slate-500 block mb-1">ชื่อรายการค่าใช้จ่าย</label>
+          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าน้ำไฟ..." class="w-full px-4 py-3 bg-pink-50/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-700">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm font-semibold text-slate-500 block mb-1">จำนวนเงิน (บาท)</label>
+            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-pink-50/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-slate-500 block mb-1">หมวดหมู่</label>
+            <select id="exp-cat" class="w-full px-4 py-3 bg-pink-50/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600">
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-sm font-semibold text-slate-500 block mb-2">ใครเป็นคนสำรองจ่ายก่อน?</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="btn-paid-pin" onclick="setPaidBy('พี่ปิ่น')" class="py-3 rounded-2xl border-2 border-pink-300 bg-pink-100 text-pink-600 font-bold transition flex justify-center items-center gap-2">
+              <i class="fas fa-user-tie"></i> พี่ปิ่นจ่าย
+            </button>
+            <button id="btn-paid-nat" onclick="setPaidBy('น้องนัด')" class="py-3 rounded-2xl border-2 border-pink-100 bg-white text-slate-400 font-bold transition flex justify-center items-center gap-2">
+              <i class="fas fa-user-astronaut"></i> น้องนัดจ่าย
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-pink-50/40 p-4 rounded-2xl border border-pink-50 space-y-3">
+          <div class="flex justify-between items-center text-sm font-semibold text-slate-500">
+            <span>สัดส่วนการหารค่าใช้จ่าย</span>
+            <button onclick="resetSplit5050()" class="text-xs text-pink-500 bg-white px-2 py-1 rounded-lg border border-pink-100 shadow-sm"><i class="fas fa-undo"></i> หารครึ่ง 50:50</button>
+          </div>
+          <input type="range" id="split-slider" min="0" max="100" value="50" oninput="onSliderChange()">
+          <div class="grid grid-cols-2 gap-2 text-center pt-1">
+            <div class="bg-white p-2 rounded-xl border border-pink-100 shadow-sm">
+              <p class="text-xs text-slate-400 font-bold">พี่ปิ่นรับผิดชอบ</p>
+              <p id="label-pin-pct" class="text-lg font-bold text-pink-500">50%</p>
+              <p id="label-pin-share" class="text-xs font-bold text-slate-400">0.00 บาท</p>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-pink-100 shadow-sm">
+              <p class="text-xs text-slate-400 font-bold">น้องนัดรับผิดชอบ</p>
+              <p id="label-nat-pct" class="text-lg font-bold text-pink-400">50%</p>
+              <p id="label-nat-share" class="text-xs font-bold text-slate-400">0.00 บาท</p>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="submitExpense()" class="w-full py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-lg rounded-2xl custom-shadow active:scale-[0.98] transition flex justify-center items-center gap-2">
+          <i class="fas fa-cloud-upload-alt"></i> บันทึกรายการลงตาราง
+        </button>
+      </div>
+    </div>
+
+    <div id="tab-dashboard" class="tab-content space-y-5 hidden">
+      <div class="bg-gradient-to-br from-rose-400 to-pink-400 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 text-white/10 text-9xl"><i class="fas fa-hand-holding-heart"></i></div>
+        <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดค้างจ่าย (รายการที่ยังไม่เคลียร์)</h3>
+        <div id="settle-summary" class="text-center py-3"></div>
+        <button onclick="confirmSettle()" class="w-full py-2.5 bg-white text-pink-500 font-bold rounded-xl shadow-sm hover:bg-pink-50 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2">
+          <i class="fas fa-check-double"></i> กดยืนยันว่า "เคลียร์เงินกันแล้ว"
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-50">
+          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-tie text-pink-400"></i> ยอดรวมที่พี่ปิ่นต้องจ่าย</p>
+          <p id="dash-pin-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-50">
+          <p class="text-xs font-bold text-slate-400"><i class="fas fa-user-astronaut text-pink-400"></i> ยอดรวมที่น้องนัดต้องจ่าย</p>
+          <p id="dash-nat-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-3xl shadow-sm border border-pink-50 space-y-3">
+        <h3 class="text-sm font-bold text-slate-500"><i class="fas fa-chart-pie text-pink-400"></i> สัดส่วนค่าใช้จ่ายแยกตามหมวดหมู่</h3>
+        <div class="w-full max-w-[240px] mx-auto">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-history" class="tab-content space-y-3 hidden">
+      <div class="flex justify-between items-center px-1">
+        <h3 class="font-bold text-slate-600"><i class="fas fa-history text-pink-400"></i> ประวัติบันทึกค่าใช้จ่าย</h3>
+        <span id="history-count" class="text-xs bg-pink-100 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
+      </div>
+      <div id="expense-list" class="space-y-3"></div>
+    </div>
+
+  </div>
+
+  <div id="cat-modal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6 hidden">
+    <div class="bg-white w-full max-w-xs rounded-3xl p-5 space-y-4 shadow-xl transform scale-95 transition-all">
+      <h3 class="font-bold text-lg text-slate-700 flex items-center gap-2"><i class="fas fa-plus-circle text-pink-400"></i> เพิ่มหมวดหมู่ใหม่</h3>
+      <input type="text" id="new-cat-input" placeholder="เช่น ค่าท่องเที่ยว, ช้อปปิ้ง" class="w-full px-4 py-3 bg-pink-50/50 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300">
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button onclick="closeAddCategoryModal()" class="py-2.5 bg-slate-100 text-slate-500 font-bold rounded-xl text-sm">ยกเลิก</button>
+        <button onclick="submitNewCategory()" class="py-2.5 bg-pink-400 text-white font-bold rounded-xl text-sm shadow-md">เพิ่มเลย</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 backdrop-blur-md rounded-t-[2.5rem] shadow-[0_-4px_20px_rgba(255,182,193,0.15)] flex justify-around items-center py-4 px-6 z-40">
+    <button onclick="switchTab('form', this)" class="nav-btn text-pink-500 flex flex-col items-center gap-1 group">
+      <div class="w-12 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-heart-circle-plus"></i></div>
+      <span class="text-xs font-bold">บันทึก</span>
+    </button>
+    <button onclick="switchTab('dashboard', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 group">
+      <div class="w-12 h-8 rounded-full bg-transparent text-slate-400 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-chart-simple"></i></div>
+      <span class="text-xs font-bold">แดชบอร์ด</span>
+    </button>
+    <button onclick="switchTab('history', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 group">
+      <div class="w-12 h-8 rounded-full bg-transparent text-slate-400 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-receipt"></i></div>
+      <span class="text-xs font-bold">ประวัติ</span>
+    </button>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyL1tmys2fpD3H1uLAr-lceScZKOg_wZAFoiJ4tC3kR-srdDyP8mZxOKIRdkx2u3f37/exec";
+
+    let globalData = { categories: [], expenses: [] };
+    let currentPaidBy = "พี่ปิ่น";
+    let myChart = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+      callAPI("getInitialData", null, renderApp);
+    });
+
+    function callAPI(action, data, callback) {
+      document.getElementById('loading').classList.remove('hidden');
+      fetch(API_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: action, data: data })
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.status === "success") {
+          callback(res.data);
+        } else {
+          alert("เกิดข้อผิดพลาด: " + res.message);
+        }
+        document.getElementById('loading').classList.add('hidden');
+      })
+      .catch(err => {
+        console.error(err);
+        alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ 🥺");
+        document.getElementById('loading').classList.add('hidden');
+      });
+    }
+
+    function renderApp(data) {
+      globalData = data;
+      const select = document.getElementById('exp-cat');
+      select.innerHTML = data.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      calculateSplit();
+      buildDashboard();
+      buildHistoryList();
+    }
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.replace('text-pink-500', 'text-slate-400');
+        btn.querySelector('div').classList.replace('bg-pink-100', 'bg-transparent');
+        btn.querySelector('div').classList.replace('text-pink-500', 'text-slate-400');
+      });
+      el.classList.replace('text-slate-400', 'text-pink-500');
+      el.querySelector('div').classList.replace('bg-transparent', 'bg-pink-100');
+      el.querySelector('div').classList.replace('text-slate-400', 'text-pink-500');
+      if(tabId === 'dashboard') { setTimeout(initOrUpdateChart, 100); }
+    }
+
+    function setPaidBy(person) {
+      currentPaidBy = person;
+      const pinBtn = document.getElementById('btn-paid-pin');
+      const natBtn = document.getElementById('btn-paid-nat');
+      if(person === 'พี่ปิ่น') {
+        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100 text-pink-600 font-bold transition flex justify-center items-center gap-2";
+        natBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white text-slate-400 font-bold transition flex justify-center items-center gap-2";
+      } else {
+        natBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100 text-pink-600 font-bold transition flex justify-center items-center gap-2";
+        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white text-slate-400 font-bold transition flex justify-center items-center gap-2";
+      }
+    }
+
+    function onSliderChange() { calculateSplit(); }
+    function resetSplit5050() { document.getElementById('split-slider').value = 50; calculateSplit(); }
+
+    function calculateSplit() {
+      const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
+      const pinPct = parseInt(document.getElementById('split-slider').value);
+      const natPct = 100 - pinPct;
+      document.getElementById('label-pin-pct').innerText = `${pinPct}%`;
+      document.getElementById('label-nat-pct').innerText = `${natPct}%`;
+      document.getElementById('label-pin-share').innerText = `${((amount * pinPct) / 100).toFixed(2)} บาท`;
+      document.getElementById('label-nat-share').innerText = `${((amount * natPct) / 100).toFixed(2)} บาท`;
+    }
+
+    function submitExpense() {
+      const desc = document.getElementById('exp-desc').value.trim();
+      const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
+      const category = document.getElementById('exp-cat').value;
+      const pinPct = parseInt(document.getElementById('split-slider').value);
+      const natPct = 100 - pinPct;
+      
+      if(!desc || amount <= 0) { alert("รบกวนกรอกข้อมูลให้ครบถ้วนด้วยน้า 🥺"); return; }
+      
+      callAPI("addExpense", {
+        desc: desc, amount: amount, paidBy: currentPaidBy,
+        pinPct: pinPct, natPct: natPct, pinShare: (amount * pinPct) / 100, natShare: (amount * natPct) / 100,
+        category: category
+      }, (data) => {
+        document.getElementById('exp-desc').value = "";
+        document.getElementById('exp-amount').value = "";
+        resetSplit5050();
+        renderApp(data);
+        alert("บันทึกข้อมูลเรียบร้อยแล้วค่ะ! 🎉");
+      });
+    }
+
+    function buildDashboard() {
+      const unpaidExpenses = globalData.expenses.filter(e => e.status === 'Unpaid');
+      let pinTotalResponsibility = 0, natTotalResponsibility = 0, pinAdvancePaid = 0, natAdvancePaid = 0;
+      
+      unpaidExpenses.forEach(e => {
+        pinTotalResponsibility += e.pinShare; natTotalResponsibility += e.natShare;
+        if(e.paidBy === 'พี่ปิ่น') pinAdvancePaid += e.amount;
+        if(e.paidBy === 'น้องนัด') natAdvancePaid += e.amount;
+      });
+      
+      document.getElementById('dash-pin-total').innerText = `${pinTotalResponsibility.toFixed(2)} ฿`;
+      document.getElementById('dash-nat-total').innerText = `${natTotalResponsibility.toFixed(2)} ฿`;
+      
+      const settleBox = document.getElementById('settle-summary');
+      const pinNet = pinTotalResponsibility - pinAdvancePaid;
+      
+      if(unpaidExpenses.length === 0) {
+        settleBox.innerHTML = `<p class="text-2xl font-bold">🎉 เดือนนี้เคลียร์ครบหมดแล้ว!</p>`;
+      } else if (pinNet > 0) {
+        settleBox.innerHTML = `<p class="text-xs opacity-80">พี่ปิ่นต้องโอนคืนให้น้องนัด</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
+      } else if (pinNet < 0) {
+        settleBox.innerHTML = `<p class="text-xs opacity-80">น้องนัดต้องโอนคืนให้พี่ปิ่น</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
+      } else {
+        settleBox.innerHTML = `<p class="text-2xl font-bold">🤝 ยอดหักลบกันลงตัวพอดี!</p>`;
+      }
+    }
+
+    function buildHistoryList() {
+      const container = document.getElementById('expense-list');
+      document.getElementById('history-count').innerText = `${globalData.expenses.length} รายการ`;
+      if(globalData.expenses.length === 0) {
+        container.innerHTML = `<div class="text-center p-8 text-slate-400 text-sm">ยังไม่มีประวัติบันทึกเลยค่ะ</div>`;
+        return;
+      }
+      container.innerHTML = globalData.expenses.map(e => {
+        const isPaid = e.status === 'Paid';
+        return `
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">${isPaid ? 'เคลียร์แล้ว' : 'ค้างเคลียร์'}</span>
+                <span class="text-xs text-slate-400">${e.date}</span>
+              </div>
+              <h4 class="font-bold text-slate-700">${e.desc}</h4>
+              <p class="text-xs text-slate-400"><span class="text-pink-500 font-bold">${e.paidBy}ออกก่อน</span> | หมวด ${e.category}</p>
+            </div>
+            <div class="text-right flex flex-col items-end gap-1">
+              <span class="text-md font-bold text-slate-700">${e.amount.toFixed(2)} ฿</span>
+              <button onclick="deleteItem('${e.id}')" class="text-rose-400 w-6 h-6 bg-rose-50 rounded-full flex items-center justify-center text-xs"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function initOrUpdateChart() {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      const catTotals = {};
+      globalData.expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
+      const labels = Object.keys(catTotals);
+      const dataValues = Object.values(catTotals);
+      if (myChart) { myChart.destroy(); }
+      if(labels.length === 0) return;
+      myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{ data: dataValues, backgroundColor: ['#FF6B8B', '#FF8EAA', '#FFAEC1', '#FFD1DC', '#E8A0BF'], borderWidth: 2, borderColor: '#ffffff' }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Itim', size: 11 } } } } }
+      });
+    }
+
+    function openAddCategoryModal() { document.getElementById('cat-modal').classList.remove('hidden'); }
+    function closeAddCategoryModal() { document.getElementById('cat-modal').classList.add('hidden'); }
+    
+    function submitNewCategory() {
+      const input = document.getElementById('new-cat-input');
+      if(!input.value.trim()) return;
+      closeAddCategoryModal();
+      callAPI("addCategory", input.value.trim(), (data) => { input.value = ""; renderApp(data); });
+    }
+
+    function deleteItem(id) {
+      if(confirm("คุณแน่ใจนะว่าจะลบรายการนี้? 🥺")) { callAPI("deleteExpense", id, renderApp); }
+    }
+
+    function confirmSettle() {
+      if(confirm("ยืนยันเมื่อโอนเงินเคลียร์ยอดกันเสร็จแล้วนะค๊าา 💕")) { callAPI("settleExpenses", null, renderApp); }
+    }
+  </script>
+</body>
+</html>
