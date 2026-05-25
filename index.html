@@ -12,16 +12,20 @@
   <style>
     body {
       font-family: 'Itim', cursive, sans-serif;
-      background-image: url('https://cdn.discordapp.com/attachments/1118181655077113948/1210884964640522250/image.png?ex=65ec398c&is=65d9c48c&hm=a1c18092a95781a74e5088f63567848f7289f6674c9354e3d36802e3b2c83307&');
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
+      background-color: #FFF5F6; 
       -webkit-tap-highlight-color: transparent;
     }
+    /* ดึงรูปภาพพื้นหลังตรงจาก GitHub Repository AKRA-WEB/PPIN */
+    .content-bg-cat {
+      background-image: url('https://raw.githubusercontent.com/AKRA-WEB/PPIN/main/cat-bg.png');
+      background-size: cover;
+      background-attachment: scroll;
+      background-position: center;
+    }
     .glass-card {
-      background-color: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background-color: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
     input[type=range] {
       -webkit-appearance: none;
@@ -45,14 +49,14 @@
     .custom-shadow { box-shadow: 0 8px 20px rgba(255, 182, 193, 0.2); }
   </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 px-4 relative">
+<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 px-4 relative bg-rose-50/30">
 
   <div id="loading" class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center gap-3">
     <i class="fas fa-cookie-bite text-pink-400 text-5xl animate-bounce"></i>
     <p class="text-pink-500 font-bold text-lg">กำลังโหลดข้อมูล...</p>
   </div>
 
-  <div class="p-5 pt-6 glass-card rounded-b-[2rem] shadow-sm flex items-center justify-between mx-1">
+  <div class="p-5 pt-6 bg-white/90 rounded-b-[2rem] shadow-sm flex items-center justify-between mx-1 relative z-20">
     <div class="flex items-center gap-3">
       <div class="w-12 h-12 bg-pink-100/90 rounded-full flex justify-center items-center text-pink-500 text-2xl">
         <i class="fas fa-heart"></i>
@@ -67,7 +71,7 @@
     </button>
   </div>
 
-  <div class="flex-1 py-4 overflow-y-auto no-scrollbar relative z-10">
+  <div class="flex-1 py-4 px-2 my-2 overflow-y-auto no-scrollbar relative z-10 content-bg-cat rounded-3xl shadow-inner">
     
     <div id="tab-form" class="tab-content space-y-5">
       <div class="glass-card p-5 rounded-3xl custom-shadow space-y-4">
@@ -75,13 +79,13 @@
         
         <div>
           <label class="text-sm font-semibold text-slate-600 block mb-1">ชื่อรายการค่าใช้จ่าย</label>
-          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-800 font-medium">
+          <input type="text" id="exp-desc" placeholder="เช่น ค่าชาบู, ค่าตู้เย็น..." class="w-full px-4 py-3 bg-white/80 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-800 font-medium">
         </div>
 
         <div class="grid grid-cols-2 gap-3 relative z-20">
           <div>
             <label class="text-sm font-semibold text-slate-600 block mb-1">จำนวนเงินรวม (บาท)</label>
-            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/60 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
+            <input type="number" id="exp-amount" oninput="calculateSplit()" placeholder="0.00" class="w-full px-4 py-3 bg-white/80 rounded-2xl border border-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-300 font-bold text-pink-500">
           </div>
           <div class="relative z-30 pointer-events-auto">
             <label class="text-sm font-semibold text-slate-600 block mb-1">หมวดหมู่</label>
@@ -90,7 +94,7 @@
           </div>
         </div>
 
-        <div class="bg-rose-50/60 p-4 rounded-2xl border border-rose-100/60 space-y-4">
+        <div class="bg-rose-50/90 p-4 rounded-2xl border border-rose-100/60 space-y-4">
           <div>
             <label class="text-sm font-bold text-slate-700 block mb-1"><i class="fas fa-calendar-day text-rose-400"></i> เริ่มเรียกเก็บเงินที่เดือนไหน?</label>
             <select id="exp-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="-webkit-appearance: listbox !important; appearance: listbox !important;">
@@ -130,7 +134,7 @@
           </div>
         </div>
 
-        <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-50 space-y-3">
+        <div class="bg-pink-50/80 p-4 rounded-2xl border border-pink-100 space-y-3">
           <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
             <span>สัดส่วนการหารค่าใช้จ่าย</span>
             <button onclick="resetSplit5050()" class="text-xs text-pink-500 bg-white px-2 py-1 rounded-lg border border-pink-100 shadow-sm"><i class="fas fa-undo"></i> หารครึ่ง 50:50</button>
@@ -192,7 +196,7 @@
     </div>
 
     <div id="tab-history" class="tab-content space-y-3 hidden">
-      <div class="flex justify-between items-center px-1">
+      <div class="flex justify-between items-center px-1 bg-white/60 p-2 rounded-xl backdrop-blur-sm">
         <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
         <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
       </div>
@@ -212,7 +216,7 @@
     </div>
   </div>
 
-  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-lg rounded-t-[2.5rem] shadow-[0_-4px_20px_rgba(255,182,193,0.15)] flex justify-around items-center py-4 px-6 z-40">
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-lg rounded-t-[2.5rem] shadow-[0_-4px_20px_rgba(255,182,193,0.15)] flex justify-around items-center py-4 px-6 z-40">
     <button onclick="switchTab('form', this)" class="nav-btn text-pink-500 flex flex-col items-center gap-1 group">
       <div class="w-12 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-heart-circle-plus"></i></div>
       <span class="text-xs font-bold">บันทึก</span>
@@ -228,7 +232,6 @@
   </div>
 
   <script>
-    // อัปเดตลิงก์ URL ตัวล่าสุดให้เรียบร้อยครับคุณ Chen
     const API_URL = "https://script.google.com/macros/s/AKfycbwfUymozeDh9ftG09Ik9ZKR95mtiqMjXzJxKVQXoIXk7JGxlOdA-zYXz3Nocydu8yek/exec";
 
     let globalData = { categories: [], expenses: [] };
