@@ -363,7 +363,7 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyV33TC9oTp5MQiQ1-DynqSMfPhG93TCx1Qb2ey8Hkg4-qmD-38vewIq4QqRva6uBG7/exec";
 
-    let globalData = { categories: [], expenses: [] };
+    let globalData = { categories: [], expenses: [], settleHistory: [] };
     let currentPaidBy = "พี่ปิ่น";
     let currentEditPaidBy = "พี่ปิ่น";
     let currentEditId = null;
@@ -859,8 +859,7 @@
       const targetMonth = sel.value;
       showConfirm(`โอนเงินเคลียร์ยอดประจำรอบ "${monthLabel}" กันเสร็จแล้วนะ 💕`, () => {
         const stats = getSettleStats(targetMonth);
-        callAPI("settleExpenses", targetMonth, (data) => {
-          saveSettleRecord(targetMonth, monthLabel, stats);
+        callAPI("settleExpenses", { month: targetMonth, monthLabel, pinTotal: stats.pinTotal, natTotal: stats.natTotal, pinNet: stats.pinNet }, (data) => {
           renderApp(data);
           showToast("เคลียร์เงินเรียบร้อย! 💸");
         });
@@ -878,12 +877,6 @@
         }
       });
       return { pinTotal: pinTotalResp, natTotal: natTotalResp, pinNet: pinTotalResp - pinPaid };
-    }
-
-    function saveSettleRecord(month, monthLabel, stats) {
-      const history = JSON.parse(localStorage.getItem('settle_history') || '[]');
-      history.unshift({ id: Date.now().toString(), settledAt: new Date().toISOString(), month, monthLabel, pinTotal: stats.pinTotal, natTotal: stats.natTotal, pinNet: stats.pinNet });
-      localStorage.setItem('settle_history', JSON.stringify(history));
     }
 
     function switchHistorySubTab(tab) {
@@ -907,7 +900,7 @@
 
     function buildSettleHistory() {
       const container = document.getElementById('settle-history-list');
-      const history = JSON.parse(localStorage.getItem('settle_history') || '[]');
+      const history = globalData.settleHistory || [];
       if (history.length === 0) {
         container.innerHTML = `<div class="bg-white text-center p-8 text-slate-500 text-sm rounded-2xl border border-pink-50">ยังไม่มีประวัติการชำระจ้า</div>`;
         return;
