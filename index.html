@@ -24,9 +24,7 @@
       -webkit-tap-highlight-color: transparent;
     }
     .glass-card {
-      background-color: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background-color: #ffffff;
     }
     input[type=range] {
       -webkit-appearance: none;
@@ -178,11 +176,11 @@
         <select id="dash-month-filter" onchange="buildDashboard(); initOrUpdateChart();" class="px-4 py-2 bg-white rounded-xl border border-pink-200 text-slate-700 font-bold text-sm focus:outline-none"></select>
       </div>
 
-      <div class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
+      <div id="settle-card" class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
         <div class="absolute -right-6 -bottom-6 text-white/10 text-9xl"><i class="fas fa-hand-holding-heart"></i></div>
         <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดค้างจ่าย (เฉพาะเดือนที่เลือก)</h3>
         <div id="settle-summary" class="text-center py-3"></div>
-        <button onclick="confirmSettle()" class="w-full py-2.5 bg-white text-pink-500 font-bold rounded-xl shadow-sm hover:bg-pink-50 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2">
+        <button id="settle-btn" onclick="confirmSettle()" class="w-full py-2.5 bg-white text-pink-500 font-bold rounded-xl shadow-sm hover:bg-pink-50 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2">
           <i class="fas fa-check-double"></i> กดยืนยันว่า "เคลียร์เงินเดือนนี้แล้ว"
         </button>
       </div>
@@ -208,16 +206,34 @@
 
     <!-- Tab: ประวัติ -->
     <div id="tab-history" class="tab-content space-y-3 hidden">
-      <div class="flex justify-between items-center px-1">
-        <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
-        <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
+      <div class="flex bg-white rounded-2xl p-1 border border-pink-50 shadow-sm">
+        <button id="sub-tab-expenses-btn" onclick="switchHistorySubTab('expenses')" class="flex-1 py-2 rounded-xl text-sm font-bold bg-pink-100 text-pink-500 transition">
+          <i class="fas fa-receipt mr-1"></i> รายการ
+        </button>
+        <button id="sub-tab-settle-btn" onclick="switchHistorySubTab('settle')" class="flex-1 py-2 rounded-xl text-sm font-bold text-slate-400 transition">
+          <i class="fas fa-money-bill-transfer mr-1"></i> ประวัติชำระ
+        </button>
       </div>
-      <div class="glass-card rounded-2xl px-3 py-2 flex items-center gap-2 border border-pink-50">
-        <i class="fas fa-search text-pink-300 text-sm"></i>
-        <input type="text" id="history-search" oninput="filterHistory()" placeholder="ค้นหารายการ..." class="flex-1 bg-transparent text-sm text-slate-700 font-medium outline-none placeholder:text-slate-300">
-        <button onclick="document.getElementById('history-search').value=''; filterHistory()" class="text-slate-300 text-xs hover:text-pink-400 transition"><i class="fas fa-times"></i></button>
+
+      <div id="sub-tab-expenses" class="space-y-3">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
+          <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
+        </div>
+        <div class="bg-white rounded-2xl px-3 py-2 flex items-center gap-2 border border-pink-50">
+          <i class="fas fa-search text-pink-300 text-sm"></i>
+          <input type="text" id="history-search" oninput="filterHistory()" placeholder="ค้นหารายการ..." class="flex-1 bg-transparent text-sm text-slate-700 font-medium outline-none placeholder:text-slate-300">
+          <button onclick="document.getElementById('history-search').value=''; filterHistory()" class="text-slate-300 text-xs hover:text-pink-400 transition"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="expense-list" class="space-y-3"></div>
       </div>
-      <div id="expense-list" class="space-y-3"></div>
+
+      <div id="sub-tab-settle" class="space-y-3 hidden">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="font-bold text-slate-700"><i class="fas fa-money-bill-transfer text-emerald-400"></i> ประวัติการชำระเงิน</h3>
+        </div>
+        <div id="settle-history-list" class="space-y-3"></div>
+      </div>
     </div>
 
   </div>
@@ -687,16 +703,31 @@
       document.getElementById('dash-nat-total').innerText = `${natTotalResp.toFixed(2)} ฿`;
 
       const settleBox = document.getElementById('settle-summary');
+      const settleCard = document.getElementById('settle-card');
+      const settleBtn = document.getElementById('settle-btn');
       const pinNet = pinTotalResp - pinPaid;
 
       if (!hasUnpaid) {
-        settleBox.innerHTML = `<p class="text-2xl font-bold">🎉 เดือนนี้เคลียร์หมดแล้วจ้า!</p>`;
-      } else if (pinNet > 0) {
-        settleBox.innerHTML = `<p class="text-xs opacity-80">พี่ปิ่นต้องโอนให้น้องนัด</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
-      } else if (pinNet < 0) {
-        settleBox.innerHTML = `<p class="text-xs opacity-80">น้องนัดต้องโอนให้พี่ปิ่น</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
+        settleCard.className = 'bg-gradient-to-br from-emerald-400 to-teal-500 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden';
+        settleBtn.classList.add('hidden');
+        settleBox.innerHTML = `
+          <div class="flex flex-col items-center gap-2">
+            <p class="text-5xl font-black">0.00 บาท</p>
+            <div class="flex items-center gap-2 bg-white/25 px-4 py-1.5 rounded-full">
+              <i class="fas fa-check-circle text-lg"></i>
+              <span class="text-sm font-bold">ชำระแล้ว เดือนนี้เคลียร์ครบ! 🎉</span>
+            </div>
+          </div>`;
       } else {
-        settleBox.innerHTML = `<p class="text-2xl font-bold">🤝 ยอดเดือนนี้ลงตัวพอดีเป๊ะ!</p>`;
+        settleCard.className = 'bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden';
+        settleBtn.classList.remove('hidden');
+        if (pinNet > 0) {
+          settleBox.innerHTML = `<p class="text-xs opacity-80">พี่ปิ่นต้องโอนให้น้องนัด</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
+        } else if (pinNet < 0) {
+          settleBox.innerHTML = `<p class="text-xs opacity-80">น้องนัดต้องโอนให้พี่ปิ่น</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
+        } else {
+          settleBox.innerHTML = `<p class="text-2xl font-bold">🤝 ยอดเดือนนี้ลงตัวพอดีเป๊ะ!</p>`;
+        }
       }
     }
 
@@ -827,8 +858,96 @@
       const monthLabel = sel.options[sel.selectedIndex].text;
       const targetMonth = sel.value;
       showConfirm(`โอนเงินเคลียร์ยอดประจำรอบ "${monthLabel}" กันเสร็จแล้วนะ 💕`, () => {
-        callAPI("settleExpenses", targetMonth, (data) => { renderApp(data); showToast("เคลียร์เงินเรียบร้อย! 💸"); });
+        const stats = getSettleStats(targetMonth);
+        callAPI("settleExpenses", targetMonth, (data) => {
+          saveSettleRecord(targetMonth, monthLabel, stats);
+          renderApp(data);
+          showToast("เคลียร์เงินเรียบร้อย! 💸");
+        });
       });
+    }
+
+    function getSettleStats(targetMonth) {
+      let pinTotalResp = 0, natTotalResp = 0, pinPaid = 0, natPaid = 0;
+      globalData.expenses.forEach(e => {
+        if (isItemInSelectedMonth(e, targetMonth) && !isMonthSettled(e, targetMonth)) {
+          pinTotalResp += e.pinShare / e.months;
+          natTotalResp += e.natShare / e.months;
+          if (e.paidBy === 'พี่ปิ่น') pinPaid += e.amount / e.months;
+          if (e.paidBy === 'น้องนัด') natPaid += e.amount / e.months;
+        }
+      });
+      return { pinTotal: pinTotalResp, natTotal: natTotalResp, pinNet: pinTotalResp - pinPaid };
+    }
+
+    function saveSettleRecord(month, monthLabel, stats) {
+      const history = JSON.parse(localStorage.getItem('settle_history') || '[]');
+      history.unshift({ id: Date.now().toString(), settledAt: new Date().toISOString(), month, monthLabel, pinTotal: stats.pinTotal, natTotal: stats.natTotal, pinNet: stats.pinNet });
+      localStorage.setItem('settle_history', JSON.stringify(history));
+    }
+
+    function switchHistorySubTab(tab) {
+      const expensesDiv = document.getElementById('sub-tab-expenses');
+      const settleDiv = document.getElementById('sub-tab-settle');
+      const expensesBtn = document.getElementById('sub-tab-expenses-btn');
+      const settleBtn = document.getElementById('sub-tab-settle-btn');
+      if (tab === 'expenses') {
+        expensesDiv.classList.remove('hidden');
+        settleDiv.classList.add('hidden');
+        expensesBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold bg-pink-100 text-pink-500 transition';
+        settleBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-slate-400 transition';
+      } else {
+        expensesDiv.classList.add('hidden');
+        settleDiv.classList.remove('hidden');
+        settleBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold bg-pink-100 text-pink-500 transition';
+        expensesBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-slate-400 transition';
+        buildSettleHistory();
+      }
+    }
+
+    function buildSettleHistory() {
+      const container = document.getElementById('settle-history-list');
+      const history = JSON.parse(localStorage.getItem('settle_history') || '[]');
+      if (history.length === 0) {
+        container.innerHTML = `<div class="bg-white text-center p-8 text-slate-500 text-sm rounded-2xl border border-pink-50">ยังไม่มีประวัติการชำระจ้า</div>`;
+        return;
+      }
+      container.innerHTML = history.map(record => {
+        const date = new Date(record.settledAt);
+        const dateStr = date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        const timeStr = date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        let transferText;
+        if (record.pinNet > 0.005) {
+          transferText = `พี่ปิ่นโอนให้น้องนัด <span class="font-black">${Math.abs(record.pinNet).toFixed(2)} บาท</span>`;
+        } else if (record.pinNet < -0.005) {
+          transferText = `น้องนัดโอนให้พี่ปิ่น <span class="font-black">${Math.abs(record.pinNet).toFixed(2)} บาท</span>`;
+        } else {
+          transferText = `ลงตัวพอดี ไม่ต้องโอน`;
+        }
+        return `
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
+                  <i class="fas fa-check text-sm"></i>
+                </div>
+                <div>
+                  <p class="font-bold text-slate-700 text-sm">${record.monthLabel}</p>
+                  <p class="text-xs text-slate-400">${dateStr} ${timeStr}</p>
+                </div>
+              </div>
+              <span class="text-xs bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full shrink-0">ชำระแล้ว</span>
+            </div>
+            <div class="bg-emerald-50 rounded-xl px-3 py-2 text-sm text-emerald-700 flex items-center gap-1.5">
+              <i class="fas fa-arrow-right-arrow-left text-emerald-400 shrink-0"></i>
+              <span>${transferText}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
+              <div class="bg-pink-50 rounded-lg px-2 py-1.5"><span class="font-bold text-pink-500">พี่ปิ่น</span> รับผิดชอบ ${record.pinTotal.toFixed(2)} ฿</div>
+              <div class="bg-pink-50 rounded-lg px-2 py-1.5"><span class="font-bold text-pink-400">น้องนัด</span> รับผิดชอบ ${record.natTotal.toFixed(2)} ฿</div>
+            </div>
+          </div>`;
+      }).join('');
     }
   </script>
 </body>
