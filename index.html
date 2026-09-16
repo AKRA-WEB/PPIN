@@ -24,9 +24,7 @@
       -webkit-tap-highlight-color: transparent;
     }
     .glass-card {
-      background-color: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background-color: #ffffff;
     }
     input[type=range] {
       -webkit-appearance: none;
@@ -51,7 +49,7 @@
     #toast { transition: opacity 0.3s ease; }
   </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen flex flex-col pb-24 px-4 relative">
+<body class="max-w-md mx-auto min-h-screen flex flex-col pb-28 px-4 relative">
 
   <!-- Loading -->
   <div id="loading" class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center gap-3">
@@ -102,53 +100,28 @@
           </div>
         </div>
 
-        <div class="bg-rose-50/60 p-4 rounded-2xl border border-rose-100/60 space-y-4">
-          <div>
-            <label class="text-sm font-bold text-slate-700 block mb-1"><i class="fas fa-calendar-day text-rose-400"></i> เริ่มเรียกเก็บเงินที่เดือนไหน?</label>
-            <select id="exp-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="-webkit-appearance: listbox !important; appearance: listbox !important;"></select>
-          </div>
-          <hr class="border-rose-100">
-          <div class="flex justify-between items-center">
-            <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-              <i class="fas fa-calendar-alt text-rose-500"></i> ผ่อนจ่ายหลายเดือน
-            </label>
-            <input type="checkbox" id="is-installment" onchange="toggleInstallmentView()" class="w-4 h-4 accent-pink-500">
-          </div>
-          <div id="installment-fields" class="grid grid-cols-2 gap-3 hidden">
-            <div>
-              <label class="text-xs font-bold text-slate-500 block mb-1">จำนวนเดือนที่ต้องการหาร</label>
-              <input type="number" id="installment-months" value="1" min="1" oninput="calculateSplit()" class="w-full px-3 py-2 bg-white/80 rounded-xl border border-pink-100 text-center font-bold text-slate-700">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 block mb-1">เฉลี่ยตกเดือนละ (บาท)</label>
-              <div id="installment-per-month" class="w-full py-2 text-md font-black text-rose-500 text-center bg-white/80 rounded-xl border border-dashed border-pink-200">0.00</div>
-            </div>
-          </div>
-          <hr class="border-rose-100">
-          <div class="flex justify-between items-center">
-            <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-              <i class="fas fa-rotate text-rose-500"></i> รายการประจำ (เกิดซ้ำทุกเดือน)
-            </label>
-            <input type="checkbox" id="is-recurring" class="w-4 h-4 accent-pink-500">
-          </div>
-        </div>
-
         <div>
-          <label class="text-sm font-semibold text-slate-600 block mb-2">ใครเป็นคนสำรองจ่ายก่อน?</label>
+          <label class="text-sm font-semibold text-slate-700 block mb-1"><i class="fas fa-wallet text-pink-400"></i> ใครเป็นคนสำรองจ่ายก่อน?</label>
+          <p class="text-[10px] text-slate-400 mb-2 leading-tight">คนที่ออกเงินจ่ายให้ร้านค้าไปก่อน (เดี๋ยวค่อยมาหารกันทีหลัง)</p>
           <div class="grid grid-cols-2 gap-3">
-            <button id="btn-paid-pin" onclick="setPaidBy('พี่ปิ่น')" class="py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2">
+            <button id="btn-paid-pin" onclick="setPaidBy('พี่ปิ่น')" class="py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2 transform active:scale-95">
               <i class="fas fa-user-tie"></i> พี่ปิ่นจ่าย
             </button>
-            <button id="btn-paid-nat" onclick="setPaidBy('น้องนัด')" class="py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2">
+            <button id="btn-paid-nat" onclick="setPaidBy('น้องนัด')" class="py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2 transform active:scale-95">
               <i class="fas fa-user-astronaut"></i> น้องนัดจ่าย
             </button>
           </div>
         </div>
 
         <div class="bg-pink-50/50 p-4 rounded-2xl border border-pink-50 space-y-3">
-          <div class="flex justify-between items-center text-sm font-semibold text-slate-600">
-            <span>สัดส่วนการหารค่าใช้จ่าย</span>
-            <button onclick="resetSplit5050()" class="text-xs text-pink-500 bg-white px-2 py-1 rounded-lg border border-pink-100 shadow-sm"><i class="fas fa-undo"></i> หารครึ่ง 50:50</button>
+          <div class="text-sm font-semibold text-slate-700 mb-1">
+            <i class="fas fa-balance-scale-right text-pink-400"></i> สัดส่วนที่แต่ละคนต้องรับผิดชอบ
+          </div>
+          <p class="text-[10px] text-slate-400 mb-2 leading-tight">เลือกสัดส่วนค่าใช้จ่ายจริงของแต่ละคน</p>
+          <div class="flex gap-2">
+            <button onclick="setSplitPreset(50, 'add')" class="flex-1 py-1.5 text-[11px] font-bold text-pink-500 bg-white border border-pink-200 rounded-xl shadow-sm active:scale-95 transition">50:50 คนละครึ่ง</button>
+            <button onclick="setSplitPreset(0, 'add')" class="flex-1 py-1.5 text-[11px] font-bold text-slate-500 bg-white border border-slate-200 rounded-xl shadow-sm active:scale-95 transition">นัด 100%</button>
+            <button onclick="setSplitPreset(100, 'add')" class="flex-1 py-1.5 text-[11px] font-bold text-pink-500 bg-white border border-pink-200 rounded-xl shadow-sm active:scale-95 transition">ปิ่น 100%</button>
           </div>
           <input type="range" id="split-slider" min="0" max="100" value="50" oninput="onSliderChange()">
           <div class="grid grid-cols-2 gap-2 text-center pt-1">
@@ -165,7 +138,38 @@
           </div>
         </div>
 
-        <button onclick="submitExpense()" class="w-full py-4 bg-gradient-to-r from-pink-400/95 to-rose-400/95 text-white font-bold text-lg rounded-2xl custom-shadow active:scale-[0.98] transition flex justify-center items-center gap-2">
+        <div class="bg-rose-50/40 p-4 rounded-2xl border border-rose-100/60 space-y-4">
+          <div>
+            <label class="text-sm font-bold text-slate-700 block mb-1"><i class="fas fa-calendar-day text-rose-400"></i> เริ่มเรียกเก็บเงินที่เดือนไหน?</label>
+            <select id="exp-start-month" class="w-full block px-3 py-2 bg-white rounded-xl border border-pink-100 text-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="-webkit-appearance: listbox !important; appearance: listbox !important;"></select>
+          </div>
+          <hr class="border-rose-100">
+          <div class="flex justify-between items-center">
+            <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer" for="is-installment">
+              <i class="fas fa-calendar-alt text-rose-500"></i> ผ่อนจ่ายหลายเดือน
+            </label>
+            <input type="checkbox" id="is-installment" onchange="toggleInstallmentView()" class="w-4 h-4 accent-pink-500 cursor-pointer">
+          </div>
+          <div id="installment-fields" class="grid grid-cols-2 gap-3 hidden">
+            <div>
+              <label class="text-xs font-bold text-slate-500 block mb-1">จำนวนเดือนที่ต้องการหาร</label>
+              <input type="number" id="installment-months" value="1" min="1" oninput="calculateSplit()" class="w-full px-3 py-2 bg-white/80 rounded-xl border border-pink-100 text-center font-bold text-slate-700">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 block mb-1">เฉลี่ยตกเดือนละ (บาท)</label>
+              <div id="installment-per-month" class="w-full py-2 text-md font-black text-rose-500 text-center bg-white/80 rounded-xl border border-dashed border-pink-200">0.00</div>
+            </div>
+          </div>
+          <hr class="border-rose-100">
+          <div class="flex justify-between items-center">
+            <label class="text-sm font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer" for="is-recurring">
+              <i class="fas fa-rotate text-rose-500"></i> รายการประจำ (เกิดซ้ำทุกเดือน)
+            </label>
+            <input type="checkbox" id="is-recurring" class="w-4 h-4 accent-pink-500 cursor-pointer">
+          </div>
+        </div>
+
+        <button onclick="submitExpense()" class="w-full py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-lg rounded-2xl custom-shadow active:scale-[0.98] transition flex justify-center items-center gap-2 hover:opacity-90">
           <i class="fas fa-cloud-upload-alt"></i> บันทึกรายการลงตาราง
         </button>
       </div>
@@ -178,23 +182,28 @@
         <select id="dash-month-filter" onchange="buildDashboard(); initOrUpdateChart();" class="px-4 py-2 bg-white rounded-xl border border-pink-200 text-slate-700 font-bold text-sm focus:outline-none"></select>
       </div>
 
-      <div class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
+      <div id="settle-card" class="bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden">
         <div class="absolute -right-6 -bottom-6 text-white/10 text-9xl"><i class="fas fa-hand-holding-heart"></i></div>
-        <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดค้างจ่าย (เฉพาะเดือนที่เลือก)</h3>
-        <div id="settle-summary" class="text-center py-3"></div>
-        <button onclick="confirmSettle()" class="w-full py-2.5 bg-white text-pink-500 font-bold rounded-xl shadow-sm hover:bg-pink-50 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2">
-          <i class="fas fa-check-double"></i> กดยืนยันว่า "เคลียร์เงินเดือนนี้แล้ว"
-        </button>
+        <h3 class="text-md font-bold opacity-90"><i class="fas fa-calculator"></i> สรุปยอดสุทธิที่ต้องโอนเคลียร์</h3>
+        <div id="settle-summary" class="text-center py-2"></div>
+        <div class="space-y-2 relative z-10">
+          <button id="copy-summary-btn" onclick="copySummary()" class="w-full py-2.5 bg-white/20 text-white font-bold rounded-xl shadow-sm hover:bg-white/30 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2 border border-white/40">
+            <i class="far fa-copy"></i> คัดลอกสรุปยอดส่งให้แฟน/ส่ง LINE
+          </button>
+          <button id="settle-btn" onclick="confirmSettle()" class="w-full py-2.5 bg-white text-pink-500 font-bold rounded-xl shadow-sm hover:bg-pink-50 active:scale-[0.98] transition text-sm flex justify-center items-center gap-2">
+            <i class="fas fa-check-double"></i> ยืนยันว่า "เคลียร์เงินเดือนนี้แล้ว"
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
-        <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50">
-          <p class="text-xs font-bold text-slate-500"><i class="fas fa-user-tie text-pink-400"></i> พี่ปิ่นต้องจ่ายรวม</p>
-          <p id="dash-pin-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
+        <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-100 flex flex-col justify-center items-center custom-shadow">
+          <p class="text-[11px] font-bold text-slate-500 text-center mb-1"><i class="fas fa-user-tie text-pink-400"></i> ยอดที่พี่ปิ่นสำรองจ่ายไปทั้งหมด</p>
+          <p id="dash-pin-paid" class="text-xl font-black text-slate-700">0.00 ฿</p>
         </div>
-        <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50">
-          <p class="text-xs font-bold text-slate-500"><i class="fas fa-user-astronaut text-pink-400"></i> น้องนัดต้องจ่ายรวม</p>
-          <p id="dash-nat-total" class="text-xl font-bold text-slate-700 mt-1">0.00 ฿</p>
+        <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-100 flex flex-col justify-center items-center custom-shadow">
+          <p class="text-[11px] font-bold text-slate-500 text-center mb-1"><i class="fas fa-user-astronaut text-pink-400"></i> ยอดที่น้องนัดสำรองจ่ายไปทั้งหมด</p>
+          <p id="dash-nat-paid" class="text-xl font-black text-slate-700">0.00 ฿</p>
         </div>
       </div>
 
@@ -208,16 +217,41 @@
 
     <!-- Tab: ประวัติ -->
     <div id="tab-history" class="tab-content space-y-3 hidden">
-      <div class="flex justify-between items-center px-1">
-        <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
-        <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
+      <div class="flex bg-white rounded-2xl p-1 border border-pink-50 shadow-sm">
+        <button id="sub-tab-expenses-btn" onclick="switchHistorySubTab('expenses')" class="flex-1 py-2 rounded-xl text-sm font-bold bg-pink-100 text-pink-500 transition">
+          <i class="fas fa-receipt mr-1"></i> รายการ
+        </button>
+        <button id="sub-tab-settle-btn" onclick="switchHistorySubTab('settle')" class="flex-1 py-2 rounded-xl text-sm font-bold text-slate-400 transition">
+          <i class="fas fa-money-bill-transfer mr-1"></i> ประวัติชำระ
+        </button>
       </div>
-      <div class="glass-card rounded-2xl px-3 py-2 flex items-center gap-2 border border-pink-50">
-        <i class="fas fa-search text-pink-300 text-sm"></i>
-        <input type="text" id="history-search" oninput="filterHistory()" placeholder="ค้นหารายการ..." class="flex-1 bg-transparent text-sm text-slate-700 font-medium outline-none placeholder:text-slate-300">
-        <button onclick="document.getElementById('history-search').value=''; filterHistory()" class="text-slate-300 text-xs hover:text-pink-400 transition"><i class="fas fa-times"></i></button>
+
+      <div id="sub-tab-expenses" class="space-y-3">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="font-bold text-slate-700"><i class="fas fa-history text-pink-400"></i> ประวัติรายการทั้งหมด</h3>
+          <span id="history-count" class="text-xs bg-pink-100/80 text-pink-600 font-bold px-2.5 py-1 rounded-full">0 รายการ</span>
+        </div>
+        <div class="flex gap-2">
+          <div class="bg-white rounded-2xl px-3 py-2 flex items-center gap-2 border border-pink-50 flex-1">
+            <i class="fas fa-search text-pink-300 text-sm"></i>
+            <input type="text" id="history-search" oninput="filterHistory()" placeholder="ค้นหารายการ..." class="w-full bg-transparent text-sm text-slate-700 font-medium outline-none placeholder:text-slate-300">
+            <button onclick="document.getElementById('history-search').value=''; filterHistory()" class="text-slate-300 text-xs hover:text-pink-400 transition"><i class="fas fa-times"></i></button>
+          </div>
+          <select id="history-status-filter" onchange="filterHistory()" class="bg-white rounded-2xl px-2 py-2 border border-pink-50 text-sm font-bold text-slate-600 outline-none shrink-0" style="-webkit-appearance: none;">
+            <option value="all">ทั้งหมด</option>
+            <option value="unpaid">ค้างเคลียร์</option>
+            <option value="paid">เคลียร์แล้ว</option>
+          </select>
+        </div>
+        <div id="expense-list" class="space-y-3"></div>
       </div>
-      <div id="expense-list" class="space-y-3"></div>
+
+      <div id="sub-tab-settle" class="space-y-3 hidden">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="font-bold text-slate-700"><i class="fas fa-money-bill-transfer text-emerald-400"></i> ประวัติการชำระเงิน</h3>
+        </div>
+        <div id="settle-history-list" class="space-y-3"></div>
+      </div>
     </div>
 
   </div>
@@ -289,21 +323,25 @@
         </div>
 
         <div>
-          <label class="text-sm font-semibold text-slate-600 block mb-2">ใครสำรองจ่าย?</label>
+          <label class="text-sm font-semibold text-slate-700 block mb-1"><i class="fas fa-wallet text-pink-400"></i> ใครเป็นคนสำรองจ่ายก่อน?</label>
           <div class="grid grid-cols-2 gap-3">
-            <button id="edit-btn-pin" onclick="setEditPaidBy('พี่ปิ่น')" class="py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1">
+            <button id="edit-btn-pin" onclick="setEditPaidBy('พี่ปิ่น')" class="py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1 transform active:scale-95">
               <i class="fas fa-user-tie"></i> พี่ปิ่น
             </button>
-            <button id="edit-btn-nat" onclick="setEditPaidBy('น้องนัด')" class="py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1">
+            <button id="edit-btn-nat" onclick="setEditPaidBy('น้องนัด')" class="py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1 transform active:scale-95">
               <i class="fas fa-user-astronaut"></i> น้องนัด
             </button>
           </div>
         </div>
 
         <div class="bg-pink-50/50 p-3 rounded-2xl space-y-2">
-          <div class="flex justify-between text-xs font-semibold text-slate-600">
-            <span>สัดส่วน</span>
-            <button onclick="document.getElementById('edit-split-slider').value=50; calculateEditSplit()" class="text-pink-500 bg-white px-2 py-0.5 rounded-lg border border-pink-100 text-xs">50:50</button>
+          <div class="text-sm font-semibold text-slate-700 mb-1">
+            <i class="fas fa-balance-scale-right text-pink-400"></i> สัดส่วนที่รับผิดชอบ
+          </div>
+          <div class="flex gap-1.5">
+            <button onclick="setSplitPreset(50, 'edit')" class="flex-1 py-1 text-[10px] font-bold text-pink-500 bg-white border border-pink-200 rounded-lg shadow-sm">50:50 คนละครึ่ง</button>
+            <button onclick="setSplitPreset(0, 'edit')" class="flex-1 py-1 text-[10px] font-bold text-slate-500 bg-white border border-slate-200 rounded-lg shadow-sm">นัด 100%</button>
+            <button onclick="setSplitPreset(100, 'edit')" class="flex-1 py-1 text-[10px] font-bold text-pink-500 bg-white border border-pink-200 rounded-lg shadow-sm">ปิ่น 100%</button>
           </div>
           <input type="range" id="edit-split-slider" min="0" max="100" value="50" oninput="calculateEditSplit()">
           <div class="grid grid-cols-2 gap-2 text-center">
@@ -329,25 +367,25 @@
   </div>
 
   <!-- Bottom Nav -->
-  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-lg rounded-t-[2.5rem] shadow-[0_-4px_20px_rgba(255,182,193,0.15)] flex justify-around items-center py-4 px-6 z-40">
-    <button onclick="switchTab('form', this)" class="nav-btn text-pink-500 flex flex-col items-center gap-1 group">
+  <div class="fixed bottom-4 left-4 right-4 max-w-[400px] mx-auto bg-white/95 backdrop-blur-lg rounded-full shadow-[0_8px_30px_rgba(255,107,139,0.2)] flex justify-around items-center py-2 px-6 z-40 border border-pink-100/50">
+    <button onclick="switchTab('form', this)" class="nav-btn text-pink-500 flex flex-col items-center gap-1 group py-1">
       <div class="w-12 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-heart-circle-plus"></i></div>
-      <span class="text-xs font-bold">บันทึก</span>
+      <span class="text-[10px] font-bold">บันทึก</span>
     </button>
-    <button onclick="switchTab('dashboard', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 group">
+    <button onclick="switchTab('dashboard', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 group py-1">
       <div class="w-12 h-8 rounded-full bg-transparent text-slate-400 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-chart-simple"></i></div>
-      <span class="text-xs font-bold">แดชบอร์ด</span>
+      <span class="text-[10px] font-bold">แดชบอร์ด</span>
     </button>
-    <button onclick="switchTab('history', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 group">
+    <button onclick="switchTab('history', this)" class="nav-btn text-slate-400 flex flex-col items-center gap-1 group py-1">
       <div class="w-12 h-8 rounded-full bg-transparent text-slate-400 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-receipt"></i></div>
-      <span class="text-xs font-bold">ประวัติ</span>
+      <span class="text-[10px] font-bold">ประวัติ</span>
     </button>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyV33TC9oTp5MQiQ1-DynqSMfPhG93TCx1Qb2ey8Hkg4-qmD-38vewIq4QqRva6uBG7/exec";
 
-    let globalData = { categories: [], expenses: [] };
+    let globalData = { categories: [], expenses: [], settleHistory: [] };
     let currentPaidBy = "พี่ปิ่น";
     let currentEditPaidBy = "พี่ปิ่น";
     let currentEditId = null;
@@ -478,11 +516,11 @@
       const pinBtn = document.getElementById('btn-paid-pin');
       const natBtn = document.getElementById('btn-paid-nat');
       if (person === 'พี่ปิ่น') {
-        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2";
-        natBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2";
+        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2 transform active:scale-95";
+        natBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2 transform active:scale-95";
       } else {
-        natBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2";
-        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2";
+        natBtn.className = "py-3 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold transition flex justify-center items-center gap-2 transform active:scale-95";
+        pinBtn.className = "py-3 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold transition flex justify-center items-center gap-2 transform active:scale-95";
       }
     }
 
@@ -496,6 +534,16 @@
 
     function onSliderChange() { calculateSplit(); }
     function resetSplit5050() { document.getElementById('split-slider').value = 50; calculateSplit(); }
+
+    function setSplitPreset(val, type) {
+      if (type === 'add') {
+        document.getElementById('split-slider').value = val;
+        calculateSplit();
+      } else {
+        document.getElementById('edit-split-slider').value = val;
+        calculateEditSplit();
+      }
+    }
 
     function calculateSplit() {
       const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
@@ -547,11 +595,11 @@
       const pinBtn = document.getElementById('edit-btn-pin');
       const natBtn = document.getElementById('edit-btn-nat');
       if (person === 'พี่ปิ่น') {
-        pinBtn.className = "py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1";
-        natBtn.className = "py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1";
+        pinBtn.className = "py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1 transform active:scale-95";
+        natBtn.className = "py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1 transform active:scale-95";
       } else {
-        natBtn.className = "py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1";
-        pinBtn.className = "py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1";
+        natBtn.className = "py-2.5 rounded-2xl border-2 border-pink-300 bg-pink-100/90 text-pink-600 font-bold text-sm transition flex justify-center items-center gap-1 transform active:scale-95";
+        pinBtn.className = "py-2.5 rounded-2xl border-2 border-pink-100 bg-white/80 text-slate-500 font-bold text-sm transition flex justify-center items-center gap-1 transform active:scale-95";
       }
     }
 
@@ -683,29 +731,77 @@
         }
       });
 
-      document.getElementById('dash-pin-total').innerText = `${pinTotalResp.toFixed(2)} ฿`;
-      document.getElementById('dash-nat-total').innerText = `${natTotalResp.toFixed(2)} ฿`;
+      document.getElementById('dash-pin-paid').innerText = `${pinPaid.toFixed(2)} ฿`;
+      document.getElementById('dash-nat-paid').innerText = `${natPaid.toFixed(2)} ฿`;
 
       const settleBox = document.getElementById('settle-summary');
+      const settleCard = document.getElementById('settle-card');
+      const settleBtn = document.getElementById('settle-btn');
+      const copyBtn = document.getElementById('copy-summary-btn');
       const pinNet = pinTotalResp - pinPaid;
 
       if (!hasUnpaid) {
-        settleBox.innerHTML = `<p class="text-2xl font-bold">🎉 เดือนนี้เคลียร์หมดแล้วจ้า!</p>`;
-      } else if (pinNet > 0) {
-        settleBox.innerHTML = `<p class="text-xs opacity-80">พี่ปิ่นต้องโอนให้น้องนัด</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
-      } else if (pinNet < 0) {
-        settleBox.innerHTML = `<p class="text-xs opacity-80">น้องนัดต้องโอนให้พี่ปิ่น</p><p class="text-3xl font-black my-1">${Math.abs(pinNet).toFixed(2)} บาท</p>`;
+        settleCard.className = 'bg-gradient-to-br from-emerald-400 to-teal-500 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden';
+        settleBtn.classList.add('hidden');
+        copyBtn.classList.add('hidden');
+        settleBox.innerHTML = `
+          <div class="flex flex-col items-center gap-2">
+            <p class="text-5xl font-black">0.00 บาท</p>
+            <div class="flex items-center gap-2 bg-white/25 px-4 py-1.5 rounded-full">
+              <i class="fas fa-check-circle text-lg"></i>
+              <span class="text-sm font-bold">ชำระแล้ว เดือนนี้เคลียร์ครบ! 🎉</span>
+            </div>
+          </div>`;
       } else {
-        settleBox.innerHTML = `<p class="text-2xl font-bold">🤝 ยอดเดือนนี้ลงตัวพอดีเป๊ะ!</p>`;
+        settleCard.className = 'bg-gradient-to-br from-rose-400/90 to-pink-400/90 p-5 rounded-3xl text-white shadow-lg space-y-4 relative overflow-hidden';
+        settleBtn.classList.remove('hidden');
+        copyBtn.classList.remove('hidden');
+        if (pinNet > 0) {
+          settleBox.innerHTML = `<p class="text-sm font-medium opacity-90 mb-1">พี่ปิ่นต้องโอนคืนให้น้องนัด</p><p class="text-4xl font-black mb-2">${Math.abs(pinNet).toFixed(2)} <span class="text-lg font-bold">บาท</span></p>`;
+        } else if (pinNet < 0) {
+          settleBox.innerHTML = `<p class="text-sm font-medium opacity-90 mb-1">น้องนัดต้องโอนคืนให้พี่ปิ่น</p><p class="text-4xl font-black mb-2">${Math.abs(pinNet).toFixed(2)} <span class="text-lg font-bold">บาท</span></p>`;
+        } else {
+          settleBox.innerHTML = `<p class="text-2xl font-bold mb-2">🤝 ยอดเดือนนี้ลงตัวพอดีเป๊ะ!</p>`;
+        }
       }
+    }
+
+    function copySummary() {
+      const sel = document.getElementById('dash-month-filter');
+      const monthLabel = sel.options[sel.selectedIndex].text;
+      const targetMonth = sel.value;
+      const stats = getSettleStats(targetMonth);
+      let netText = "";
+      if (stats.pinNet > 0) {
+        netText = `พี่ปิ่นต้องโอนคืนให้น้องนัด: ${Math.abs(stats.pinNet).toFixed(2)} บาท`;
+      } else if (stats.pinNet < 0) {
+        netText = `น้องนัดต้องโอนคืนให้พี่ปิ่น: ${Math.abs(stats.pinNet).toFixed(2)} บาท`;
+      } else {
+        netText = `เดือนนี้ลงตัวพอดี ไม่ต้องโอนเพิ่มจ้า`;
+      }
+      
+      const textToCopy = `🌸 สรุปยอดค่าใช้จ่ายประจำเดือน ${monthLabel} 🌸\n\n- ยอดที่พี่ปิ่นสำรองจ่ายไปทั้งหมด: ${stats.pinPaid.toFixed(2)} บาท\n- ยอดที่น้องนัดสำรองจ่ายทั้งหมด: ${stats.natPaid.toFixed(2)} บาท\n- พี่ปิ่นรับผิดชอบรวม: ${stats.pinTotal.toFixed(2)} บาท\n- น้องนัดรับผิดชอบรวม: ${stats.natTotal.toFixed(2)} บาท\n\n📌 สรุปยอดสุทธิ:\n${netText}\n\nเช็คดูแล้วมาเคลียร์กันน้า 💕`;
+      
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("คัดลอกข้อความแล้ว! นำไปวางใน LINE ได้เลย 📋");
+      }).catch(err => {
+        showToast("ไม่สามารถคัดลอกได้ 🥺", 'error');
+      });
     }
 
     // ─── History ─────────────────────────────────────────────
     function filterHistory() {
       const query = document.getElementById('history-search').value.trim().toLowerCase();
+      const statusFilter = document.getElementById('history-status-filter').value;
+      
       document.querySelectorAll('#expense-list .history-item').forEach(item => {
         const text = item.getAttribute('data-search') || '';
-        item.style.display = text.includes(query) ? '' : 'none';
+        const status = item.getAttribute('data-status') || '';
+        
+        const matchText = text.includes(query);
+        const matchStatus = statusFilter === 'all' || status === statusFilter;
+        
+        item.style.display = (matchText && matchStatus) ? '' : 'none';
       });
     }
 
@@ -728,11 +824,14 @@
         }
 
         let statusBadge;
+        let itemStatus = 'unpaid';
         if (isInstallment) {
           const settledCount = e.settledMonths ? e.settledMonths.length : (isPaid ? e.months : 0);
           const allDone = settledCount >= e.months;
+          itemStatus = allDone ? 'paid' : 'unpaid';
           statusBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${allDone ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">เคลียร์ ${settledCount}/${e.months} เดือน</span>`;
         } else {
+          itemStatus = isPaid ? 'paid' : 'unpaid';
           statusBadge = `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${isPaid ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}">${isPaid ? 'เคลียร์แล้ว' : 'ค้างเคลียร์'}</span>`;
         }
 
@@ -747,7 +846,7 @@
         const searchText = `${e.desc} ${e.category} ${e.paidBy}`.toLowerCase();
 
         return `
-          <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center history-item" data-search="${searchText}">
+          <div class="glass-card p-4 rounded-2xl shadow-sm border border-pink-50 flex justify-between items-center history-item" data-search="${searchText}" data-status="${itemStatus}">
             <div class="flex-1 min-w-0 pr-2">
               <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                 ${statusBadge}
@@ -827,8 +926,89 @@
       const monthLabel = sel.options[sel.selectedIndex].text;
       const targetMonth = sel.value;
       showConfirm(`โอนเงินเคลียร์ยอดประจำรอบ "${monthLabel}" กันเสร็จแล้วนะ 💕`, () => {
-        callAPI("settleExpenses", targetMonth, (data) => { renderApp(data); showToast("เคลียร์เงินเรียบร้อย! 💸"); });
+        const stats = getSettleStats(targetMonth);
+        callAPI("settleExpenses", { month: targetMonth, monthLabel, pinTotal: stats.pinTotal, natTotal: stats.natTotal, pinNet: stats.pinNet }, (data) => {
+          renderApp(data);
+          showToast("เคลียร์เงินเรียบร้อย! 💸");
+        });
       });
+    }
+
+    function getSettleStats(targetMonth) {
+      let pinTotalResp = 0, natTotalResp = 0, pinPaid = 0, natPaid = 0;
+      globalData.expenses.forEach(e => {
+        if (isItemInSelectedMonth(e, targetMonth) && !isMonthSettled(e, targetMonth)) {
+          pinTotalResp += e.pinShare / e.months;
+          natTotalResp += e.natShare / e.months;
+          if (e.paidBy === 'พี่ปิ่น') pinPaid += e.amount / e.months;
+          if (e.paidBy === 'น้องนัด') natPaid += e.amount / e.months;
+        }
+      });
+      return { pinTotal: pinTotalResp, natTotal: natTotalResp, pinPaid: pinPaid, natPaid: natPaid, pinNet: pinTotalResp - pinPaid };
+    }
+
+    function switchHistorySubTab(tab) {
+      const expensesDiv = document.getElementById('sub-tab-expenses');
+      const settleDiv = document.getElementById('sub-tab-settle');
+      const expensesBtn = document.getElementById('sub-tab-expenses-btn');
+      const settleBtn = document.getElementById('sub-tab-settle-btn');
+      if (tab === 'expenses') {
+        expensesDiv.classList.remove('hidden');
+        settleDiv.classList.add('hidden');
+        expensesBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold bg-pink-100 text-pink-500 transition';
+        settleBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-slate-400 transition';
+      } else {
+        expensesDiv.classList.add('hidden');
+        settleDiv.classList.remove('hidden');
+        settleBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold bg-pink-100 text-pink-500 transition';
+        expensesBtn.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-slate-400 transition';
+        buildSettleHistory();
+      }
+    }
+
+    function buildSettleHistory() {
+      const container = document.getElementById('settle-history-list');
+      const history = globalData.settleHistory || [];
+      if (history.length === 0) {
+        container.innerHTML = `<div class="bg-white text-center p-8 text-slate-500 text-sm rounded-2xl border border-pink-50">ยังไม่มีประวัติการชำระจ้า</div>`;
+        return;
+      }
+      container.innerHTML = history.map(record => {
+        const date = new Date(record.settledAt);
+        const dateStr = date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        const timeStr = date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        let transferText;
+        if (record.pinNet > 0.005) {
+          transferText = `พี่ปิ่นโอนให้น้องนัด <span class="font-black">${Math.abs(record.pinNet).toFixed(2)} บาท</span>`;
+        } else if (record.pinNet < -0.005) {
+          transferText = `น้องนัดโอนให้พี่ปิ่น <span class="font-black">${Math.abs(record.pinNet).toFixed(2)} บาท</span>`;
+        } else {
+          transferText = `ลงตัวพอดี ไม่ต้องโอน`;
+        }
+        return `
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
+                  <i class="fas fa-check text-sm"></i>
+                </div>
+                <div>
+                  <p class="font-bold text-slate-700 text-sm">${record.monthLabel}</p>
+                  <p class="text-xs text-slate-400">${dateStr} ${timeStr}</p>
+                </div>
+              </div>
+              <span class="text-xs bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full shrink-0">ชำระแล้ว</span>
+            </div>
+            <div class="bg-emerald-50 rounded-xl px-3 py-2 text-sm text-emerald-700 flex items-center gap-1.5">
+              <i class="fas fa-arrow-right-arrow-left text-emerald-400 shrink-0"></i>
+              <span>${transferText}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
+              <div class="bg-pink-50 rounded-lg px-2 py-1.5"><span class="font-bold text-pink-500">พี่ปิ่น</span> รับผิดชอบ ${record.pinTotal.toFixed(2)} ฿</div>
+              <div class="bg-pink-50 rounded-lg px-2 py-1.5"><span class="font-bold text-pink-400">น้องนัด</span> รับผิดชอบ ${record.natTotal.toFixed(2)} ฿</div>
+            </div>
+          </div>`;
+      }).join('');
     }
   </script>
 </body>
